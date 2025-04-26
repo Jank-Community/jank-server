@@ -39,17 +39,15 @@ func GetAllPostsWithPaging(page, pageSize int) ([]*post.Post, int64, error) {
 	var posts []*post.Post
 	var total int64
 
-	offset := (page - 1) * pageSize
-
 	// 查询文章总数
 	if err := global.DB.Model(&post.Post{}).Where("deleted = ?", false).Count(&total).Error; err != nil {
 		return nil, 0, fmt.Errorf("获取文章总数失败: %w", err)
 	}
 
-	// 查询分页数据
+	// 使用雪花算法ID排序的分页查询 (雪花ID本身包含时间信息，降序排列即为最新内容)
 	if err := global.DB.Where("deleted = ?", false).
-		Order("gmt_create DESC").
-		Offset(offset).Limit(pageSize).
+		Order("id DESC").
+		Limit(pageSize).Offset((page - 1) * pageSize).
 		Find(&posts).Error; err != nil {
 		return nil, 0, fmt.Errorf("获取分页文章列表失败: %w", err)
 	}

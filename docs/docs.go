@@ -992,13 +992,15 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "页码",
                         "name": "page",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "integer",
-                        "description": "每页显示数量",
-                        "name": "pageSize",
-                        "in": "query"
+                        "description": "每页条数",
+                        "name": "page_size",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1589,8 +1591,7 @@ const docTemplate = `{
                     "minLength": 1
                 },
                 "parent_id": {
-                    "type": "integer",
-                    "minimum": 0
+                    "type": "integer"
                 }
             }
         },
@@ -1601,8 +1602,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "category_id": {
-                    "type": "integer",
-                    "minimum": 0
+                    "type": "integer"
                 },
                 "content_markdown": {
                     "type": "string"
@@ -1759,8 +1759,7 @@ const docTemplate = `{
                     "minLength": 1
                 },
                 "parent_id": {
-                    "type": "integer",
-                    "minimum": 0
+                    "type": "integer"
                 }
             }
         },
@@ -1771,8 +1770,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "category_id": {
-                    "type": "integer",
-                    "minimum": 0
+                    "type": "integer"
                 },
                 "content_markdown": {
                     "type": "string"

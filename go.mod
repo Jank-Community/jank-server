@@ -3,6 +3,7 @@ module jank.com/jank_blog
 go 1.23.0
 
 require (
+	github.com/bwmarrin/snowflake v0.3.0
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/go-playground/validator/v10 v10.22.1
 	github.com/golang-jwt/jwt/v4 v4.5.2

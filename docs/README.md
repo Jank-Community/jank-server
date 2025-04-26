@@ -140,7 +140,7 @@
    - 请求方式：GET
    - 请求路径：/api/v1/post/getAllPosts
    - 请求参数 query：
-      - pageSize：每页显示的文章数量，默认值：5
+      - page_size：每页显示的文章数量，默认值：5
       - page：当前页码，默认值：1
    - 响应示例：
         ```json

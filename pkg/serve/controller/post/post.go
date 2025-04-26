@@ -50,14 +50,21 @@ func GetOnePost(c echo.Context) error {
 // @Tags         文章
 // @Accept       json
 // @Produce      json
-// @Param        page     query    int     false  "页码"
-// @Param        pageSize query    int     false  "每页显示数量"
+// @Param        page        query     int     true   "页码"
+// @Param        page_size   query     int     true   "每页条数"
 // @Success      200  {object}  vo.Result{data=[]post.PostsVO}  "获取成功"
 // @Failure      500  {object}  vo.Result                 "服务器错误"
 // @Router       /post/getAllPosts [get]
 func GetAllPosts(c echo.Context) error {
-	page, _ := strconv.Atoi(c.QueryParam("page"))
-	pageSize, _ := strconv.Atoi(c.QueryParam("pageSize"))
+	page, err := strconv.Atoi(c.QueryParam("page"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	pageSize, err := strconv.Atoi(c.QueryParam("page_size"))
+	if err != nil || pageSize < 1 {
+		pageSize = 5
+	}
 
 	response, err := service.GetAllPostsWithPagingAndFormat(page, pageSize, c)
 	if err != nil {
@@ -145,7 +152,7 @@ func UpdateOnePost(c echo.Context) error {
 // @Router       /post/deleteOnePost [post]
 func DeleteOnePost(c echo.Context) error {
 	req := new(dto.DeleteOnePostRequest)
-	if err := c.Bind(req); err != nil {
+	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(err, bizErr.New(bizErr.BAD_REQUEST, err.Error()), c))
 	}
 

@@ -11,5 +11,5 @@ type CreateOnePostRequest struct {
 	Image           string `json:"image" xml:"image" form:"image" query:"image" default:""`
 	Visibility      bool   `json:"visibility" xml:"visibility" form:"visibility" query:"visibility" validate:"omitempty,boolean" default:"false"`
 	ContentMarkdown string `json:"content_markdown" xml:"content_markdown" form:"content_markdown" query:"content_markdown" default:""`
-	CategoryID      int64  `json:"category_id" xml:"category_id" form:"category_id" query:"category_id" validate:"omitempty,gte=0"`
+	CategoryID      int64  `json:"category_id" xml:"category_id" form:"category_id" query:"category_id" validate:"omitempty"`
 }

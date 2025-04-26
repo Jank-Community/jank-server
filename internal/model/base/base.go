@@ -4,14 +4,17 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+	"log"
 	"time"
 
 	"gorm.io/gorm"
+
+	"jank.com/jank_blog/internal/utils"
 )
 
 // Base 包含通用字段
 type Base struct {
-	ID          int64   `gorm:"primaryKey;autoIncrement" json:"id"`        // 主键
+	ID          int64   `gorm:"primaryKey;type:bigint" json:"id"`          // 主键（雪花算法）
 	GmtCreate   int64   `gorm:"type:bigint" json:"gmt_create"`             // 创建时间
 	GmtModified int64   `gorm:"type:bigint" json:"gmt_modified"`           // 更新时间
 	Ext         JSONMap `gorm:"type:json" json:"ext"`                      // 扩展字段
@@ -44,6 +47,14 @@ func (m *Base) BeforeCreate(db *gorm.DB) (err error) {
 	m.GmtCreate = currentTime
 	m.GmtModified = currentTime
 	m.Deleted = false
+
+	// 使用雪花算法生成ID
+	id, err := utils.GenerateID()
+	if err != nil {
+		log.Printf("生成雪花ID时出错: %v", err)
+	}
+	m.ID = id
+
 	if m.Ext == nil {
 		m.Ext = make(map[string]interface{})
 	}

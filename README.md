@@ -116,8 +116,8 @@ Jank 是一个轻量级的博客系统，基于 Go 语言和 Echo 框架开发�
 
    # Swagger 相关
    swagger:
-    SWAGGER_HOST: "localhost:9010" # 启用后访问 http://localhost:9010/swagger/index.html 页面获取 Swagger 可视化文档
-    SWAGGER_ENABLED: "true" # 是否启用Swagger，可选值: true, false
+     SWAGGER_HOST: "localhost:9010" # 启用后访问 http://localhost:9010/swagger/index.html 页面获取 Swagger 可视化文档
+     SWAGGER_ENABLED: "true" # 是否启用Swagger，可选值: true, false
    ```
 
 3. **启动服务**：  
@@ -238,17 +238,19 @@ Jank 是一个轻量级的博客系统，基于 Go 语言和 Echo 框架开发�
 </p>
 
 ### 详细统计
-| 语言 | 文件数 | 代码行数 | 注释行数 | 空白行数 | 占比 |
-|:----:|:------:|:--------:|:--------:|:--------:|:----:|
-| Go | 80 | 3478 | 653 | 712 | 92.3% |
-| Docker | 1 | 18 | 13 | 12 | 0.5% |
-| YAML | 3 | 235 | 21 | 32 | 6.2% |
-| Markdown | 1 | 1 | 0 | 0 | 0.0% |
-| 其他 | 1 | 36 | 0 | 6 | 1.0% |
-| **总计** | **86** | **3768** | **687** | **762** | **100%** |
 
-*注：统计数据由 GitHub Actions 自动更新，最后更新于 2025-04-23*
-*排除了 docs、tmp 目录和 go.mod、go.sum、LICENSE、.gitignore、.dockerignore、README.md、README_en.md 文件*
+|   语言   | 文件数 | 代码行数 | 注释行数 | 空白行数 |   占比   |
+| :------: | :----: | :------: | :------: | :------: | :------: |
+|    Go    |   80   |   3478   |   653    |   712    |  92.3%   |
+|  Docker  |   1    |    18    |    13    |    12    |   0.5%   |
+|   YAML   |   3    |   235    |    21    |    32    |   6.2%   |
+| Markdown |   1    |    1     |    0     |    0     |   0.0%   |
+|   其他   |   1    |    36    |    0     |    6     |   1.0%   |
+| **总计** | **86** | **3768** | **687**  | **762**  | **100%** |
+
+_注：统计数据由 GitHub Actions 自动更新，最后更新于 2025-04-23_
+_排除了 docs、tmp 目录和 go.mod、go.sum、LICENSE、.gitignore、.dockerignore、README.md、README_en.md 文件_
+
 ## 许可证
 
 本项目遵循 [MIT 协议](https://opensource.org/licenses/MIT)。

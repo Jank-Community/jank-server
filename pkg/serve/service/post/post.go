@@ -86,11 +86,9 @@ func CreateOnePost(req *dto.CreateOnePostRequest, c echo.Context) (*post.PostsVO
 		return nil, fmt.Errorf("创建文章失败: %w", err)
 	}
 
-	if CategoryID > 0 {
-		if err := mapper.CreatePostCategory(newPost.ID, CategoryID); err != nil {
-			utils.BizLogger(c).Errorf("创建文章-类目关联失败: %v", err)
-			return nil, fmt.Errorf("创建文章-类目关联失败: %w", err)
-		}
+	if err := mapper.CreatePostCategory(newPost.ID, CategoryID); err != nil {
+		utils.BizLogger(c).Errorf("创建文章-类目关联失败: %v", err)
+		return nil, fmt.Errorf("创建文章-类目关联失败: %w", err)
 	}
 
 	vo, err := utils.MapModelToVO(newPost, &post.PostsVO{})
@@ -108,7 +106,7 @@ func CreateOnePost(req *dto.CreateOnePostRequest, c echo.Context) (*post.PostsVO
 // GetOnePostByIDOrTitle 根据 ID 或 Title 获取文章
 func GetOnePostByIDOrTitle(req *dto.GetOnePostRequest, c echo.Context) (interface{}, error) {
 	switch {
-	case req.ID > 0:
+	case req.ID != 0:
 		pos, err := mapper.GetPostByID(req.ID)
 		if err != nil {
 			utils.BizLogger(c).Errorf("根据 ID 获取文章失败: %v", err)
@@ -180,14 +178,6 @@ func GetOnePostByIDOrTitle(req *dto.GetOnePostRequest, c echo.Context) (interfac
 
 // GetAllPostsWithPagingAndFormat 获取格式化后的分页文章列表、总页数和当前页数
 func GetAllPostsWithPagingAndFormat(page, pageSize int, c echo.Context) (map[string]interface{}, error) {
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 {
-		pageSize = 5
-	}
-
-	// 获取分页数据和总页数
 	posts, total, err := mapper.GetAllPostsWithPaging(page, pageSize)
 	if err != nil {
 		utils.BizLogger(c).Errorf("获取文章列表失败: %v", err)
@@ -315,11 +305,9 @@ func UpdateOnePost(req *dto.UpdateOnePostRequest, c echo.Context) (*post.PostsVO
 		return nil, fmt.Errorf("更新文章失败: %w", err)
 	}
 
-	if CategoryID > 0 {
-		if err := mapper.UpdatePostCategory(req.ID, CategoryID); err != nil {
-			utils.BizLogger(c).Errorf("更新文章-类目关联失败: %v", err)
-			return nil, fmt.Errorf("更新文章-类目关联失败: %w", err)
-		}
+	if err := mapper.UpdatePostCategory(req.ID, CategoryID); err != nil {
+		utils.BizLogger(c).Errorf("更新文章-类目关联失败: %v", err)
+		return nil, fmt.Errorf("更新文章-类目关联失败: %w", err)
 	}
 
 	vo, err := utils.MapModelToVO(pos, &post.PostsVO{})

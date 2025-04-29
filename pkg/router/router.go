@@ -6,7 +6,7 @@ import (
 	"jank.com/jank_blog/pkg/router/routes"
 )
 
-// @title		Jank Blog API
+// New @title		Jank Blog API
 // @version		1.0
 // @description	This is the API documentation for Jank Blog.
 // @host		localhost:9010

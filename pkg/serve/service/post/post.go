@@ -103,77 +103,36 @@ func CreateOnePost(req *dto.CreateOnePostRequest, c echo.Context) (*post.PostsVO
 	return postsVO, nil
 }
 
-// GetOnePostByIDOrTitle 根据 ID 或 Title 获取文章
-func GetOnePostByIDOrTitle(req *dto.GetOnePostRequest, c echo.Context) (interface{}, error) {
-	switch {
-	case req.ID != 0:
-		pos, err := mapper.GetPostByID(req.ID)
-		if err != nil {
-			utils.BizLogger(c).Errorf("根据 ID 获取文章失败: %v", err)
-			return nil, fmt.Errorf("根据 ID 获取文章失败: %w", err)
-		}
-		if pos == nil {
-			utils.BizLogger(c).Errorf("文章不存在: %v", err)
-			return nil, fmt.Errorf("文章不存在: %w", err)
-		}
-
-		vo, err := utils.MapModelToVO(pos, &post.PostsVO{})
-		if err != nil {
-			utils.BizLogger(c).Errorf("获取文章时映射 VO 失败: %v", err)
-			return nil, fmt.Errorf("获取文章时映射 VO 失败: %w", err)
-		}
-
-		postsVO := vo.(*post.PostsVO)
-
-		postCategory, err := mapper.GetPostCategory(pos.ID)
-		if err != nil {
-			utils.BizLogger(c).Errorf("获取文章类目关联失败: %v", err)
-		}
-
-		if postCategory != nil {
-			postsVO.CategoryID = postCategory.CategoryID
-		}
-
-		return postsVO, nil
-
-	case req.Title != "":
-		posts, err := mapper.GetPostsByTitle(req.Title)
-		if err != nil {
-			utils.BizLogger(c).Errorf("根据标题获取文章失败: %v", err)
-			return nil, fmt.Errorf("根据标题获取文章失败: %w", err)
-		}
-		if len(posts) == 0 {
-			utils.BizLogger(c).Errorf("没有找到与标题 \"%s\" 匹配的文章", req.Title)
-			return nil, fmt.Errorf("没有找到与标题 \"%s\" 匹配的文章", req.Title)
-		}
-
-		postsVO := make([]*post.PostsVO, len(posts))
-		for i, pos := range posts {
-			vo, err := utils.MapModelToVO(pos, &post.PostsVO{})
-			if err != nil {
-				utils.BizLogger(c).Errorf("获取文章时映射 VO 失败: %v", err)
-				return nil, fmt.Errorf("获取文章时映射 VO 失败: %w", err)
-			}
-
-			postVO := vo.(*post.PostsVO)
-
-			postCategory, err := mapper.GetPostCategory(pos.ID)
-			if err != nil {
-				utils.BizLogger(c).Errorf("获取文章ID「%d」的类目关联失败: %v", pos.ID, err)
-			}
-
-			if postCategory != nil {
-				postVO.CategoryID = postCategory.CategoryID
-			}
-
-			postsVO[i] = postVO
-		}
-		return postsVO, nil
-
-	default:
-		utils.BizLogger(c).Error("参数 id 和 title 至少需要传递一个")
-		return nil, fmt.Errorf("参数 id 和 title 至少需要传递一个")
+// GetOnePostByID 根据 ID 获取文章
+func GetOnePostByID(req *dto.GetOnePostRequest, c echo.Context) (interface{}, error) {
+	pos, err := mapper.GetPostByID(req.ID)
+	if err != nil {
+		utils.BizLogger(c).Errorf("根据 ID 获取文章失败: %v", err)
+		return nil, fmt.Errorf("根据 ID 获取文章失败: %w", err)
 	}
+	if pos == nil {
+		utils.BizLogger(c).Errorf("文章不存在: %v", err)
+		return nil, fmt.Errorf("文章不存在: %w", err)
+	}
+
+	vo, err := utils.MapModelToVO(pos, &post.PostsVO{})
+	if err != nil {
+		utils.BizLogger(c).Errorf("获取文章时映射 VO 失败: %v", err)
+		return nil, fmt.Errorf("获取文章时映射 VO 失败: %w", err)
+	}
+
+	postsVO := vo.(*post.PostsVO)
+
+	postCategory, err := mapper.GetPostCategory(pos.ID)
+	if err != nil {
+		utils.BizLogger(c).Errorf("获取文章类目关联失败: %v", err)
+	}
+
+	if postCategory != nil {
+		postsVO.CategoryID = postCategory.CategoryID
+	}
+
+	return postsVO, nil
 }
 
 // GetAllPostsWithPagingAndFormat 获取格式化后的分页文章列表、总页数和当前页数

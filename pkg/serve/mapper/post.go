@@ -24,16 +24,6 @@ func GetPostByID(id int64) (*post.Post, error) {
 	return &pos, nil
 }
 
-// GetPostsByTitle 通过 Title 获取所有匹配的文章
-func GetPostsByTitle(title string) ([]post.Post, error) {
-	var posts []post.Post
-	if err := global.DB.Where("title LIKE ? AND deleted = ?", "%"+title+"%", false).
-		Find(&posts).Error; err != nil {
-		return nil, fmt.Errorf("根据标题查询文章失败: %w", err)
-	}
-	return posts, nil
-}
-
 // GetAllPostsWithPaging 获取分页后的文章列表和文章总数
 func GetAllPostsWithPaging(page, pageSize int) ([]*post.Post, int64, error) {
 	var posts []*post.Post

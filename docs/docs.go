@@ -1036,7 +1036,7 @@ const docTemplate = `{
         },
         "/post/getOnePost": {
             "get": {
-                "description": "根据文章 ID 或标题获取文章的详细信息，至少需要提供其中一个参数",
+                "description": "根据文章 ID 获取文章的详细信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -1650,10 +1650,6 @@ const docTemplate = `{
                 "id": {
                     "type": "integer",
                     "default": 0
-                },
-                "title": {
-                    "type": "string",
-                    "maxLength": 225
                 }
             }
         },
@@ -1848,7 +1844,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:9010",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "Jank Blog API",
+	Title:            "",
 	Description:      "This is the API documentation for Jank Blog.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

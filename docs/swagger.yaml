@@ -121,9 +121,6 @@ definitions:
       id:
         default: 0
         type: integer
-      title:
-        maxLength: 225
-        type: string
     type: object
   dto.LoginRequest:
     description: 用户登录请求所需参数
@@ -253,7 +250,6 @@ host: localhost:9010
 info:
   contact: {}
   description: This is the API documentation for Jank Blog.
-  title: Jank Blog API
   version: "1.0"
 paths:
   /account/getAccount:
@@ -875,7 +871,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 根据文章 ID 或标题获取文章的详细信息，至少需要提供其中一个参数
+      description: 根据文章 ID 获取文章的详细信息
       parameters:
       - description: 获取文章请求参数
         in: body

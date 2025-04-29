@@ -58,19 +58,6 @@ func GetAllActivatedCategories() ([]*category.Category, error) {
 	return categories, nil
 }
 
-// GetParentCategoryPathByID 根据父类目 ID 查找父类目的路径
-func GetParentCategoryPathByID(parentID int64) (string, error) {
-	if parentID == 0 {
-		return "", nil
-	}
-
-	var parentCategory category.Category
-	if err := global.DB.Select("path").Where("id = ? AND deleted = ?", parentID, false).First(&parentCategory).Error; err != nil {
-		return "", fmt.Errorf("获取父类目路径失败: %v", err)
-	}
-	return parentCategory.Path, nil
-}
-
 // CreateCategory 将新类目保存到数据库
 func CreateCategory(newCategory *category.Category) error {
 	if err := global.DB.Create(newCategory).Error; err != nil {

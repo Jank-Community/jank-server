@@ -15,7 +15,7 @@ import (
 
 // GetOnePost    godoc
 // @Summary      获取文章详情
-// @Description  根据文章 ID 或标题获取文章的详细信息，至少需要提供其中一个参数
+// @Description  根据文章 ID 获取文章的详细信息
 // @Tags         文章
 // @Accept       json
 // @Produce      json
@@ -36,7 +36,7 @@ func GetOnePost(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, vo.Fail(errors, bizErr.New(bizErr.BAD_REQUEST), c))
 	}
 
-	pos, err := service.GetOnePostByIDOrTitle(req, c)
+	pos, err := service.GetOnePostByID(req, c)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, vo.Fail(err, bizErr.New(bizErr.SERVER_ERR, err.Error()), c))
 	}

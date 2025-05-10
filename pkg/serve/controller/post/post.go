@@ -1,3 +1,6 @@
+// Package post 提供文章相关的HTTP接口处理
+// 创建者：Done-0
+// 创建时间：2025-05-10
 package post
 
 import (
@@ -28,20 +31,20 @@ import (
 func GetOnePost(c echo.Context) error {
 	req := new(dto.GetOnePostRequest)
 	if err := c.Bind(req); err != nil {
-		return c.JSON(http.StatusBadRequest, vo.Fail(err, bizErr.New(bizErr.BAD_REQUEST, err.Error()), c))
+		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
 	errors := utils.Validator(*req)
 	if errors != nil {
-		return c.JSON(http.StatusBadRequest, vo.Fail(errors, bizErr.New(bizErr.BAD_REQUEST), c))
+		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST)))
 	}
 
-	pos, err := service.GetOnePostByID(req, c)
+	pos, err := service.GetOnePostByID(c, req)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, vo.Fail(err, bizErr.New(bizErr.SERVER_ERR, err.Error()), c))
+		return c.JSON(http.StatusInternalServerError, vo.Fail(c, err, bizErr.New(bizErr.SERVER_ERR, err.Error())))
 	}
 
-	return c.JSON(http.StatusOK, vo.Success(pos, c))
+	return c.JSON(http.StatusOK, vo.Success(c, pos))
 }
 
 // GetAllPosts   godoc
@@ -66,12 +69,12 @@ func GetAllPosts(c echo.Context) error {
 		pageSize = 5
 	}
 
-	response, err := service.GetAllPostsWithPagingAndFormat(page, pageSize, c)
+	posts, err := service.GetAllPostsWithPagingAndFormat(c, page, pageSize)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, vo.Fail(err, bizErr.New(bizErr.SERVER_ERR, err.Error()), c))
+		return c.JSON(http.StatusInternalServerError, vo.Fail(c, err, bizErr.New(bizErr.SERVER_ERR, err.Error())))
 	}
 
-	return c.JSON(http.StatusOK, vo.Success(response, c))
+	return c.JSON(http.StatusOK, vo.Success(c, posts))
 }
 
 // CreateOnePost godoc
@@ -89,20 +92,20 @@ func GetAllPosts(c echo.Context) error {
 func CreateOnePost(c echo.Context) error {
 	req := new(dto.CreateOnePostRequest)
 	if err := c.Bind(req); err != nil {
-		return c.JSON(http.StatusBadRequest, vo.Fail(err, bizErr.New(bizErr.BAD_REQUEST, err.Error()), c))
+		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
 	errors := utils.Validator(*req)
 	if errors != nil {
-		return c.JSON(http.StatusBadRequest, vo.Fail(errors, bizErr.New(bizErr.BAD_REQUEST), c))
+		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST)))
 	}
 
-	createdPost, err := service.CreateOnePost(req, c)
+	createdPost, err := service.CreateOnePost(c, req)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, vo.Fail(err, bizErr.New(bizErr.SERVER_ERR, err.Error()), c))
+		return c.JSON(http.StatusInternalServerError, vo.Fail(c, err, bizErr.New(bizErr.SERVER_ERR, err.Error())))
 	}
 
-	return c.JSON(http.StatusOK, vo.Success(createdPost, c))
+	return c.JSON(http.StatusOK, vo.Success(c, createdPost))
 }
 
 // UpdateOnePost godoc
@@ -121,20 +124,20 @@ func CreateOnePost(c echo.Context) error {
 func UpdateOnePost(c echo.Context) error {
 	req := new(dto.UpdateOnePostRequest)
 	if err := c.Bind(req); err != nil {
-		return c.JSON(http.StatusBadRequest, vo.Fail(err, bizErr.New(bizErr.BAD_REQUEST, err.Error()), c))
+		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
 	errors := utils.Validator(*req)
 	if errors != nil {
-		return c.JSON(http.StatusBadRequest, vo.Fail(errors, bizErr.New(bizErr.BAD_REQUEST), c))
+		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST)))
 	}
 
-	updatedPost, err := service.UpdateOnePost(req, c)
+	updatedPost, err := service.UpdateOnePost(c, req)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, vo.Fail(err, bizErr.New(bizErr.SERVER_ERR, err.Error()), c))
+		return c.JSON(http.StatusInternalServerError, vo.Fail(c, err, bizErr.New(bizErr.SERVER_ERR, err.Error())))
 	}
 
-	return c.JSON(http.StatusOK, vo.Success(updatedPost, c))
+	return c.JSON(http.StatusOK, vo.Success(c, updatedPost))
 }
 
 // DeleteOnePost godoc
@@ -153,18 +156,18 @@ func UpdateOnePost(c echo.Context) error {
 func DeleteOnePost(c echo.Context) error {
 	req := new(dto.DeleteOnePostRequest)
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, vo.Fail(err, bizErr.New(bizErr.BAD_REQUEST, err.Error()), c))
+		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
 	errors := utils.Validator(*req)
 	if errors != nil {
-		return c.JSON(http.StatusBadRequest, vo.Fail(errors, bizErr.New(bizErr.BAD_REQUEST), c))
+		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST)))
 	}
 
-	err := service.DeleteOnePost(req, c)
+	err := service.DeleteOnePost(c, req)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, vo.Fail(err, bizErr.New(bizErr.SERVER_ERR, err.Error()), c))
+		return c.JSON(http.StatusInternalServerError, vo.Fail(c, err, bizErr.New(bizErr.SERVER_ERR, err.Error())))
 	}
 
-	return c.JSON(http.StatusOK, vo.Success("文章删除成功", c))
+	return c.JSON(http.StatusOK, vo.Success(c, "文章删除成功"))
 }

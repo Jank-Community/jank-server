@@ -1,3 +1,6 @@
+// Package base 提供基础模型定义和通用数据库操作方法
+// 创建者：Done-0
+// 创建时间：2025-05-10
 package base
 
 import (
@@ -25,6 +28,11 @@ type Base struct {
 type JSONMap map[string]interface{}
 
 // Scan 从数据库读取 json 数据
+// 参数：
+//   - value: 数据库返回的值
+//
+// 返回值：
+//   - error: 操作过程中的错误
 func (j *JSONMap) Scan(value interface{}) error {
 	bytes, ok := value.([]byte)
 	if !ok {
@@ -34,6 +42,9 @@ func (j *JSONMap) Scan(value interface{}) error {
 }
 
 // Value 将 JSONMap 转换为 json 数据存储到数据库
+// 返回值：
+//   - driver.Value: 数据库驱动值
+//   - error: 操作过程中的错误
 func (j JSONMap) Value() (driver.Value, error) {
 	if j == nil {
 		return "{}", nil
@@ -42,6 +53,11 @@ func (j JSONMap) Value() (driver.Value, error) {
 }
 
 // BeforeCreate 创建前操作，设置时间戳等
+// 参数：
+//   - db: GORM数据库连接
+//
+// 返回值：
+//   - error: 操作过程中的错误
 func (m *Base) BeforeCreate(db *gorm.DB) (err error) {
 	currentTime := time.Now().Unix()
 	m.GmtCreate = currentTime
@@ -62,6 +78,11 @@ func (m *Base) BeforeCreate(db *gorm.DB) (err error) {
 }
 
 // BeforeUpdate 更新前操作，更新修改时间
+// 参数：
+//   - db: GORM数据库连接
+//
+// 返回值：
+//   - error: 操作过程中的错误
 func (m *Base) BeforeUpdate(db *gorm.DB) (err error) {
 	m.GmtModified = time.Now().Unix()
 	return nil

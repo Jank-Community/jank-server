@@ -1,3 +1,6 @@
+// Package utils 提供雪花算法ID生成工具
+// 创建者：Done-0
+// 创建时间：2025-05-10
 package utils
 
 import (
@@ -13,7 +16,10 @@ var (
 	once sync.Once
 )
 
-// GenerateID 生成雪花算法ID
+// GenerateID 生成雪花算法 ID
+// 返回值：
+//   - int64: 生成的雪花算法 ID
+//   - error: 操作过程中的错误
 func GenerateID() (int64, error) {
 	once.Do(func() {
 		var err error
@@ -28,8 +34,8 @@ func GenerateID() (int64, error) {
 		return node.Generate().Int64(), nil
 
 	default:
-		// 雪花格式: 41位时间戳 + 10位节点ID + 12位序列号
-		// 标准雪花纪元，节点ID 1，序列号使用当前纳秒的低12位
+		// 雪花格式: 41 位时间戳 + 10 位节点 ID + 12 位序列号
+		// 标准雪花纪元，节点 ID 1，序列号使用当前纳秒的低 12 位
 		ts := time.Now().UnixMilli() - 1288834974657
 		nodeID := int64(1)
 		seq := time.Now().UnixNano() & 0xFFF

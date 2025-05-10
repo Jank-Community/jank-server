@@ -1817,14 +1817,22 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "code": {
+                    "description": "错误码",
                     "type": "integer"
                 },
-                "data": {},
+                "data": {
+                    "description": "响应数据"
+                },
                 "msg": {
+                    "description": "错误信息",
                     "type": "string"
                 },
-                "requestId": {},
-                "timeStamp": {}
+                "requestId": {
+                    "description": "请求ID"
+                },
+                "timeStamp": {
+                    "description": "响应时间戳"
+                }
             }
         }
     },

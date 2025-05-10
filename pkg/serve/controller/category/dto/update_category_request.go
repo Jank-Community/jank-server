@@ -1,3 +1,6 @@
+// Package dto 提供类目相关的数据传输对象定义
+// 创建者：Done-0
+// 创建时间：2025-05-10
 package dto
 
 // UpdateOneCategoryRequest    更新类目请求

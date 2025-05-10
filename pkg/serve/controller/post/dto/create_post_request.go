@@ -1,3 +1,6 @@
+// Package dto 提供文章相关的数据传输对象定义
+// 创建者：Done-0
+// 创建时间：2025-05-10
 package dto
 
 // CreateOnePostRequest         发布文章的请求结构体

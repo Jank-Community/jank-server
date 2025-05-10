@@ -1,3 +1,6 @@
+// Package router 提供应用程序路由注册功能
+// 创建者：Done-0
+// 创建时间：2025-05-10
 package router
 
 import (
@@ -16,6 +19,8 @@ import (
 // @name Authorization
 // @description 输入格式: Bearer {token}
 // New 函数用于注册应用程序的路由
+// 参数：
+//   - app: Echo 实例
 func New(app *echo.Echo) {
 	// 创建多版本 API 路由组
 	api1 := app.Group("/api/v1")

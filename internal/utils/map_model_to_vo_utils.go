@@ -1,3 +1,6 @@
+// Package utils 提供模型对象到视图对象的映射工具
+// 创建者：Done-0
+// 创建时间：2025-05-10
 package utils
 
 import (
@@ -9,6 +12,13 @@ import (
 )
 
 // MapModelToVO 将模型数据映射到对应的 VO，返回具体类型的指针
+// 参数：
+//   - modelData: 源模型数据
+//   - voPtr: 目标视图对象指针
+//
+// 返回值：
+//   - interface{}: 映射后的视图对象指针
+//   - error: 映射过程中的错误
 func MapModelToVO(modelData interface{}, voPtr interface{}) (interface{}, error) {
 	modelVal := reflect.ValueOf(modelData)
 	voVal := reflect.ValueOf(voPtr)

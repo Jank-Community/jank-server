@@ -1,3 +1,6 @@
+// Package model 提供实体关联数据模型定义
+// 创建者：Done-0
+// 创建时间：2025-05-10
 package model
 
 import (
@@ -11,6 +14,9 @@ type PostCategory struct {
 	CategoryID int64 `gorm:"type:bigint;index" json:"category_id"`      // 类目ID
 }
 
+// TableName 指定表名
+// 返回值：
+//   - string: 表名
 func (PostCategory) TableName() string {
 	return "post_categories"
 }

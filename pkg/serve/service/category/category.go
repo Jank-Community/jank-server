@@ -25,13 +25,13 @@ import (
 //   - interface{}: 获取到的类目视图对象
 //   - error: 操作过程中的错误
 func GetCategoryByID(c echo.Context, req *dto.GetOneCategoryRequest) (*category.CategoriesVO, error) {
-	cat, err := mapper.GetCategoryByID(c, req.ID)
+	categoryModel, err := mapper.GetCategoryByID(c, req.ID)
 	if err != nil {
 		utils.BizLogger(c).Errorf("根据 ID 获取类目失败: %v", err)
 		return nil, fmt.Errorf("根据 ID 获取类目失败: %w", err)
 	}
 
-	categoryVO, err := utils.MapModelToVO(cat, &category.CategoriesVO{})
+	categoryVO, err := utils.MapModelToVO(categoryModel, &category.CategoriesVO{})
 	if err != nil {
 		utils.BizLogger(c).Errorf("获取类目时映射 VO 失败: %v", err)
 		return nil, fmt.Errorf("获取类目时映射 VO 失败: %w", err)
@@ -48,7 +48,7 @@ func GetCategoryByID(c echo.Context, req *dto.GetOneCategoryRequest) (*category.
 //   - []*category.CategoriesVO: 类目树结构
 //   - error: 操作过程中的错误
 func GetCategoryTree(c echo.Context) ([]*category.CategoriesVO, error) {
-	categories, err := mapper.GetAllActivatedCategories(c)
+	categoryModels, err := mapper.GetAllActivatedCategories(c)
 	if err != nil {
 		utils.BizLogger(c).Errorf("获取类目树失败: %v", err)
 		return nil, fmt.Errorf("获取类目树失败: %w", err)
@@ -56,21 +56,21 @@ func GetCategoryTree(c echo.Context) ([]*category.CategoriesVO, error) {
 
 	// 构建类目映射（ID -> 类目对象指针）
 	categoryMap := make(map[int64]*model.Category)
-	for i := range categories {
-		categoryMap[categories[i].ID] = categories[i]
+	for i := range categoryModels {
+		categoryMap[categoryModels[i].ID] = categoryModels[i]
 	}
 
 	// 构建父子关系
 	var rootCategories []*model.Category
-	for i := range categories {
-		cat := categories[i]
-		if cat.ParentID == 0 {
-			rootCategories = append(rootCategories, cat)
-		} else if parent, exists := categoryMap[cat.ParentID]; exists {
+	for i := range categoryModels {
+		categoryModel := categoryModels[i]
+		if categoryModel.ParentID == 0 {
+			rootCategories = append(rootCategories, categoryModel)
+		} else if parent, exists := categoryMap[categoryModel.ParentID]; exists {
 			if parent.Children == nil {
 				parent.Children = make([]*model.Category, 0)
 			}
-			parent.Children = append(parent.Children, cat)
+			parent.Children = append(parent.Children, categoryModel)
 		}
 	}
 
@@ -96,7 +96,7 @@ func GetCategoryTree(c echo.Context) ([]*category.CategoriesVO, error) {
 //   - []*category.CategoriesVO: 子类目列表
 //   - error: 操作过程中的错误
 func GetCategoryChildrenByID(c echo.Context, req *dto.GetOneCategoryRequest) ([]*category.CategoriesVO, error) {
-	categories, err := mapper.GetAllActivatedCategories(c)
+	categoryModels, err := mapper.GetAllActivatedCategories(c)
 	if err != nil {
 		utils.BizLogger(c).Errorf("根据 ID 获取层级子类目失败: %v", err)
 		return nil, fmt.Errorf("根据 ID 获取层级子类目失败: %w", err)
@@ -104,18 +104,18 @@ func GetCategoryChildrenByID(c echo.Context, req *dto.GetOneCategoryRequest) ([]
 
 	// 构建类目映射与父子关系
 	categoryMap := make(map[int64]*model.Category)
-	for i := range categories {
-		categoryMap[categories[i].ID] = categories[i]
+	for i := range categoryModels {
+		categoryMap[categoryModels[i].ID] = categoryModels[i]
 	}
 
-	for i := range categories {
-		cat := categories[i]
-		if cat.ParentID != 0 {
-			if parent, exists := categoryMap[cat.ParentID]; exists {
+	for i := range categoryModels {
+		categoryModel := categoryModels[i]
+		if categoryModel.ParentID != 0 {
+			if parent, exists := categoryMap[categoryModel.ParentID]; exists {
 				if parent.Children == nil {
 					parent.Children = make([]*model.Category, 0)
 				}
-				parent.Children = append(parent.Children, cat)
+				parent.Children = append(parent.Children, categoryModel)
 			}
 		}
 	}
@@ -292,13 +292,13 @@ func DeleteCategory(c echo.Context, req *dto.DeleteOneCategoryRequest) ([]*categ
 	var deletedCategoriesVO []*category.CategoriesVO
 
 	err := utils.RunDBTransaction(c, func(tx error) error {
-		cat, err := mapper.GetCategoryByID(c, req.ID)
+		categoryModel, err := mapper.GetCategoryByID(c, req.ID)
 		if err != nil {
 			utils.BizLogger(c).Errorf("获取类目失败: %v", err)
 			return fmt.Errorf("获取类目失败: %w", err)
 		}
 
-		categoriesToDelete, err := mapper.GetCategoriesByPath(c, cat.Path)
+		categoriesToDelete, err := mapper.GetCategoriesByPath(c, categoryModel.Path)
 		if err != nil {
 			utils.BizLogger(c).Errorf("获取子类目失败: %v", err)
 			return fmt.Errorf("获取子类目失败: %w", err)
@@ -309,10 +309,10 @@ func DeleteCategory(c echo.Context, req *dto.DeleteOneCategoryRequest) ([]*categ
 		var categoryIDs []int64
 
 		categoryIDs = append(categoryIDs, req.ID)
-		deletedCategories = append(deletedCategories, cat)
+		deletedCategories = append(deletedCategories, categoryModel)
 
 		for _, childCat := range categoriesToDelete {
-			if childCat.ID != req.ID && strings.HasPrefix(childCat.Path, cat.Path) {
+			if childCat.ID != req.ID && strings.HasPrefix(childCat.Path, categoryModel.Path) {
 				deletedCategories = append(deletedCategories, childCat)
 				categoryIDs = append(categoryIDs, childCat.ID)
 			}
@@ -327,7 +327,7 @@ func DeleteCategory(c echo.Context, req *dto.DeleteOneCategoryRequest) ([]*categ
 		}
 
 		// 软删除类目
-		if err := mapper.DeleteCategoriesByPathSoftly(c, cat.Path, req.ID); err != nil {
+		if err := mapper.DeleteCategoriesByPathSoftly(c, categoryModel.Path, req.ID); err != nil {
 			utils.BizLogger(c).Errorf("软删除类目失败: %v", err)
 			return fmt.Errorf("软删除类目失败: %w", err)
 		}
@@ -340,19 +340,19 @@ func DeleteCategory(c echo.Context, req *dto.DeleteOneCategoryRequest) ([]*categ
 
 		var rootDeletedCategories []*model.Category
 		for i := range deletedCategories {
-			cat := deletedCategories[i]
-			if cat.ParentID == 0 {
+			categoryModel := deletedCategories[i]
+			if categoryModel.ParentID == 0 {
 				// 如果没有父类目，直接作为根节点
-				rootDeletedCategories = append(rootDeletedCategories, cat)
-			} else if _, exists := deletedCategoryMap[cat.ParentID]; !exists {
+				rootDeletedCategories = append(rootDeletedCategories, categoryModel)
+			} else if _, exists := deletedCategoryMap[categoryModel.ParentID]; !exists {
 				// 如果父类目不在被删除的类目中，作为根节点
-				rootDeletedCategories = append(rootDeletedCategories, cat)
-			} else if parent, exists := deletedCategoryMap[cat.ParentID]; exists {
+				rootDeletedCategories = append(rootDeletedCategories, categoryModel)
+			} else if parent, exists := deletedCategoryMap[categoryModel.ParentID]; exists {
 				// 父类目存在，添加为其子节点
 				if parent.Children == nil {
 					parent.Children = make([]*model.Category, 0)
 				}
-				parent.Children = append(parent.Children, cat)
+				parent.Children = append(parent.Children, categoryModel)
 			}
 		}
 
@@ -415,8 +415,8 @@ func recursivelyUpdateChildrenPaths(c echo.Context, parentCategory *model.Catego
 // 返回值：
 //   - *category.CategoriesVO: 构建后的类目树视图对象
 //   - error: 操作过程中的错误
-func buildCategoryVOTree(c echo.Context, cat *model.Category) (*category.CategoriesVO, error) {
-	categoryVO, err := utils.MapModelToVO(cat, &category.CategoriesVO{})
+func buildCategoryVOTree(c echo.Context, categoryModel *model.Category) (*category.CategoriesVO, error) {
+	categoryVO, err := utils.MapModelToVO(categoryModel, &category.CategoriesVO{})
 	if err != nil {
 		return nil, fmt.Errorf("构建类目树 VO 失败: %w", err)
 	}
@@ -424,8 +424,8 @@ func buildCategoryVOTree(c echo.Context, cat *model.Category) (*category.Categor
 	catVO := categoryVO.(*category.CategoriesVO)
 	catVO.Children = make([]*category.CategoriesVO, 0)
 
-	if len(cat.Children) > 0 {
-		for _, child := range cat.Children {
+	if len(categoryModel.Children) > 0 {
+		for _, child := range categoryModel.Children {
 			childVO, err := buildCategoryVOTree(c, child)
 			if err != nil {
 				return nil, err

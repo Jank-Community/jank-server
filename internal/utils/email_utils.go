@@ -43,8 +43,8 @@ func SendEmail(content string, toEmail []string) (bool, error) {
 	}
 
 	// 获取SMTP相关配置
-	fromEmail := config.AppConfig.FromEmail
-	emailType := config.AppConfig.EmailType
+	fromEmail := config.AppConfig.Email.FromEmail
+	emailType := config.AppConfig.Email.EmailType
 
 	// 获取邮箱类型和对应的服务器配置
 	serverConfig, ok := emailServers[emailType]
@@ -61,7 +61,7 @@ func SendEmail(content string, toEmail []string) (bool, error) {
 	e.Text = []byte(content)
 
 	smtpAddr := serverConfig.Server + serverConfig.Port
-	auth := smtp.PlainAuth("", fromEmail, config.AppConfig.EmailSmtp, serverConfig.Server)
+	auth := smtp.PlainAuth("", fromEmail, config.AppConfig.Email.EmailSmtp, serverConfig.Server)
 
 	if err := e.Send(smtpAddr, auth); err != nil {
 		global.SysLog.Errorf("发送邮件失败, toEmail: %v, 错误信息: %v", toEmail, err)

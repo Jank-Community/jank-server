@@ -15,12 +15,24 @@ import (
 
 // AppConfig 应用配置
 type AppConfig struct {
-	AppName   string `mapstructure:"APP_NAME"`
-	AppHost   string `mapstructure:"APP_HOST"`
-	AppPort   string `mapstructure:"APP_PORT"`
+	AppName string      `mapstructure:"APP_NAME"`
+	AppHost string      `mapstructure:"APP_HOST"`
+	AppPort string      `mapstructure:"APP_PORT"`
+	Email   EmailConfig `mapstructure:"EMAIL"`
+	Theme   ThemeConfig `mapstructure:"THEME"`
+}
+
+// EmailConfig 邮箱配置
+type EmailConfig struct {
 	EmailType string `mapstructure:"EMAIL_TYPE"`
 	FromEmail string `mapstructure:"FROM_EMAIL"`
 	EmailSmtp string `mapstructure:"EMAIL_SMTP"`
+}
+
+// ThemeConfig 主题配置
+type ThemeConfig struct {
+	ThemeDir         string   `mapstructure:"THEME_DIR"`
+	ThemeConfigFiles []string `mapstructure:"THEME_CONFIG_FILES"`
 }
 
 // DatabaseConfig 数据库配置
@@ -60,11 +72,11 @@ type SwaggerConfig struct {
 
 // Config 总配置结构
 type Config struct {
-	AppConfig     AppConfig      `mapstructure:"app"`
-	DBConfig      DatabaseConfig `mapstructure:"database"`
-	RedisConfig   RedisConfig    `mapstructure:"redis"`
-	LogConfig     LogConfig      `mapstructure:"log"`
-	SwaggerConfig SwaggerConfig  `mapstructure:"swagger"`
+	AppConfig     AppConfig      `mapstructure:"APP"`
+	DBConfig      DatabaseConfig `mapstructure:"DATABASE"`
+	RedisConfig   RedisConfig    `mapstructure:"REDIS"`
+	LogConfig     LogConfig      `mapstructure:"LOG"`
+	SwaggerConfig SwaggerConfig  `mapstructure:"SWAGGER"`
 }
 
 // DefaultConfigPath 默认配置文件路径

@@ -1336,6 +1336,282 @@
                 }
             }
         },
+        "/theme/activateOneTheme": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "激活指定ID的主题",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "主题"
+                ],
+                "summary": "激活主题",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主题ID",
+                        "name": "themeID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "激活成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/vo.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/theme.ThemeVO"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    },
+                    "404": {
+                        "description": "主题不存在",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    }
+                }
+            }
+        },
+        "/theme/deleteOneTheme": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除指定ID的主题及其文件",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "主题"
+                ],
+                "summary": "删除主题",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主题ID",
+                        "name": "themeID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "是否删除设置",
+                        "name": "deleteSetting",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    },
+                    "404": {
+                        "description": "主题不存在",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    }
+                }
+            }
+        },
+        "/theme/getActivatedTheme": {
+            "get": {
+                "description": "获取当前已激活的主题信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "主题"
+                ],
+                "summary": "获取当前激活的主题",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/vo.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/theme.ThemeVO"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    }
+                }
+            }
+        },
+        "/theme/getOneTheme": {
+            "get": {
+                "description": "根据主题ID获取主题详细信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "主题"
+                ],
+                "summary": "获取指定主题信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主题ID",
+                        "name": "themeID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/vo.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/theme.ThemeVO"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    },
+                    "404": {
+                        "description": "主题不存在",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    }
+                }
+            }
+        },
+        "/theme/listAllThemes": {
+            "get": {
+                "description": "获取系统中所有可用的主题",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "主题"
+                ],
+                "summary": "获取所有主题列表",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/vo.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/theme.ThemeVO"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    }
+                }
+            }
+        },
         "/verification/sendEmailVerificationCode": {
             "get": {
                 "description": "向指定邮箱发送验证码，验证码有效期为3分钟",
@@ -1803,6 +2079,63 @@
                 },
                 "visibility": {
                     "type": "boolean"
+                }
+            }
+        },
+        "theme.ThemeVO": {
+            "type": "object",
+            "properties": {
+                "activated": {
+                    "description": "是否激活",
+                    "type": "boolean"
+                },
+                "author": {
+                    "description": "主题作者",
+                    "type": "string"
+                },
+                "createdAt": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "主题描述",
+                    "type": "string"
+                },
+                "folderName": {
+                    "description": "主题文件夹名称",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "主题ID",
+                    "type": "integer"
+                },
+                "logo": {
+                    "description": "主题Logo图片路径",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "主题名称",
+                    "type": "string"
+                },
+                "screenshots": {
+                    "description": "主题截图",
+                    "type": "string"
+                },
+                "themePath": {
+                    "description": "主题路径",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "description": "更新时间",
+                    "type": "string"
+                },
+                "version": {
+                    "description": "主题版本",
+                    "type": "string"
+                },
+                "website": {
+                    "description": "主题官网URL",
+                    "type": "string"
                 }
             }
         },

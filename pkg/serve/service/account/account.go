@@ -40,13 +40,13 @@ const (
 //   - *account.GetAccountVO: 用户账户视图对象
 //   - error: 操作过程中的错误
 func GetAccount(c echo.Context, req *dto.GetAccountRequest) (*account.GetAccountVO, error) {
-	userInfo, err := mapper.GetAccountByEmail(c, req.Email)
+	accountModel, err := mapper.GetAccountByEmail(c, req.Email)
 	if err != nil {
 		utils.BizLogger(c).Errorf("「%s」邮箱不存在", req.Email)
 		return nil, fmt.Errorf("「%s」邮箱不存在", req.Email)
 	}
 
-	vo, err := utils.MapModelToVO(userInfo, &account.GetAccountVO{})
+	vo, err := utils.MapModelToVO(accountModel, &account.GetAccountVO{})
 	if err != nil {
 		utils.BizLogger(c).Errorf("获取用户信息时映射 VO 失败: %v", err)
 		return nil, fmt.Errorf("获取用户信息时映射 VO 失败: %w", err)
@@ -70,13 +70,13 @@ func RegisterAcc(c echo.Context, req *dto.RegisterRequest) (*account.RegisterAcc
 	var registerVO *account.RegisterAccountVO
 
 	err := utils.RunDBTransaction(c, func(tx error) error {
-		totalAccounts, err := mapper.GetTotalAccounts(c)
+		accountCount, err := mapper.GetTotalAccounts(c)
 		if err != nil {
 			utils.BizLogger(c).Errorf("获取用户总数失败: %v", err)
 			return fmt.Errorf("获取用户总数失败: %w", err)
 		}
 
-		if totalAccounts > 0 {
+		if accountCount > 0 {
 			utils.BizLogger(c).Error("系统限制: 当前为单用户独立部署版本，已达到账户数量上限 (1/1)")
 			return fmt.Errorf("系统限制: 当前为单用户独立部署版本，已达到账户数量上限 (1/1)")
 		}
@@ -93,19 +93,19 @@ func RegisterAcc(c echo.Context, req *dto.RegisterRequest) (*account.RegisterAcc
 			return fmt.Errorf("哈希加密失败: %w", err)
 		}
 
-		acc := &model.Account{
+		accountModel := &model.Account{
 			Email:    req.Email,
 			Password: string(hashedPassword),
 			Nickname: req.Nickname,
 			Phone:    req.Phone,
 		}
 
-		if err := mapper.CreateAccount(c, acc); err != nil {
+		if err := mapper.CreateAccount(c, accountModel); err != nil {
 			utils.BizLogger(c).Errorf("「%s」用户注册失败: %v", req.Email, err)
 			return fmt.Errorf("「%s」用户注册失败: %w", req.Email, err)
 		}
 
-		vo, err := utils.MapModelToVO(acc, &account.RegisterAccountVO{})
+		vo, err := utils.MapModelToVO(accountModel, &account.RegisterAccountVO{})
 		if err != nil {
 			utils.BizLogger(c).Errorf("用户注册时映射 VO 失败: %v", err)
 			return fmt.Errorf("用户注册时映射 VO 失败: %w", err)
@@ -131,25 +131,25 @@ func RegisterAcc(c echo.Context, req *dto.RegisterRequest) (*account.RegisterAcc
 //   - *account.LoginVO: 登录成功后的令牌视图对象
 //   - error: 操作过程中的错误
 func LoginAcc(c echo.Context, req *dto.LoginRequest) (*account.LoginVO, error) {
-	acc, err := mapper.GetAccountByEmail(c, req.Email)
+	accountModel, err := mapper.GetAccountByEmail(c, req.Email)
 	if err != nil {
 		utils.BizLogger(c).Errorf("「%s」用户不存在: %v", req.Email, err)
 		return nil, fmt.Errorf("「%s」用户不存在: %w", req.Email, err)
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(acc.Password), []byte(req.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(accountModel.Password), []byte(req.Password))
 	if err != nil {
 		utils.BizLogger(c).Errorf("密码输入错误: %v", err)
 		return nil, fmt.Errorf("密码输入错误: %w", err)
 	}
 
-	accessTokenString, refreshTokenString, err := utils.GenerateJWT(acc.ID)
+	accessTokenString, refreshTokenString, err := utils.GenerateJWT(accountModel.ID)
 	if err != nil {
 		utils.BizLogger(c).Errorf("token 生成失败: %v", err)
 		return nil, fmt.Errorf("token 生成失败: %w", err)
 	}
 
-	cacheKey := fmt.Sprintf("%s:%d", USER_CACHE, acc.ID)
+	cacheKey := fmt.Sprintf("%s:%d", USER_CACHE, accountModel.ID)
 
 	err = global.RedisClient.Set(context.Background(), cacheKey, accessTokenString, USER_CACHE_EXPIRE_TIME).Err()
 	if err != nil {
@@ -220,7 +220,7 @@ func ResetPassword(c echo.Context, req *dto.ResetPwdRequest) error {
 			return fmt.Errorf("解析 token 失败: %w", err)
 		}
 
-		acc, err := mapper.GetAccountByAccountID(c, accountID)
+		accountModel, err := mapper.GetAccountByAccountID(c, accountID)
 		if err != nil {
 			utils.BizLogger(c).Errorf("「%s」用户不存在: %v", req.Email, err)
 			return fmt.Errorf("「%s」用户不存在: %w", req.Email, err)
@@ -231,9 +231,9 @@ func ResetPassword(c echo.Context, req *dto.ResetPwdRequest) error {
 			utils.BizLogger(c).Errorf("密码加密失败: %v", err)
 			return fmt.Errorf("密码加密失败: %w", err)
 		}
-		acc.Password = string(newPassword)
+		accountModel.Password = string(newPassword)
 
-		if err := mapper.UpdateAccount(c, acc); err != nil {
+		if err := mapper.UpdateAccount(c, accountModel); err != nil {
 			utils.BizLogger(c).Errorf("密码修改失败: %v", err)
 			return fmt.Errorf("密码修改失败: %w", err)
 		}

@@ -236,6 +236,48 @@ definitions:
       visibility:
         type: boolean
     type: object
+  theme.ThemeVO:
+    properties:
+      activated:
+        description: 是否激活
+        type: boolean
+      author:
+        description: 主题作者
+        type: string
+      createdAt:
+        description: 创建时间
+        type: string
+      description:
+        description: 主题描述
+        type: string
+      folderName:
+        description: 主题文件夹名称
+        type: string
+      id:
+        description: 主题ID
+        type: integer
+      logo:
+        description: 主题Logo图片路径
+        type: string
+      name:
+        description: 主题名称
+        type: string
+      screenshots:
+        description: 主题截图
+        type: string
+      themePath:
+        description: 主题路径
+        type: string
+      updatedAt:
+        description: 更新时间
+        type: string
+      version:
+        description: 主题版本
+        type: string
+      website:
+        description: 主题官网URL
+        type: string
+    type: object
   vo.Result:
     properties:
       code:
@@ -1064,6 +1106,174 @@ paths:
             $ref: '#/definitions/vo.Result'
       tags:
       - test
+  /theme/activateOneTheme:
+    post:
+      consumes:
+      - application/json
+      description: 激活指定ID的主题
+      parameters:
+      - description: 主题ID
+        in: path
+        name: themeID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 激活成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/vo.Result'
+            - properties:
+                data:
+                  $ref: '#/definitions/theme.ThemeVO'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/vo.Result'
+        "404":
+          description: 主题不存在
+          schema:
+            $ref: '#/definitions/vo.Result'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/vo.Result'
+      security:
+      - BearerAuth: []
+      summary: 激活主题
+      tags:
+      - 主题
+  /theme/deleteOneTheme:
+    post:
+      consumes:
+      - application/json
+      description: 删除指定ID的主题及其文件
+      parameters:
+      - description: 主题ID
+        in: path
+        name: themeID
+        required: true
+        type: string
+      - default: false
+        description: 是否删除设置
+        in: query
+        name: deleteSetting
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/vo.Result'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/vo.Result'
+        "404":
+          description: 主题不存在
+          schema:
+            $ref: '#/definitions/vo.Result'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/vo.Result'
+      security:
+      - BearerAuth: []
+      summary: 删除主题
+      tags:
+      - 主题
+  /theme/getActivatedTheme:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前已激活的主题信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/vo.Result'
+            - properties:
+                data:
+                  $ref: '#/definitions/theme.ThemeVO'
+              type: object
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/vo.Result'
+      summary: 获取当前激活的主题
+      tags:
+      - 主题
+  /theme/getOneTheme:
+    get:
+      consumes:
+      - application/json
+      description: 根据主题ID获取主题详细信息
+      parameters:
+      - description: 主题ID
+        in: path
+        name: themeID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/vo.Result'
+            - properties:
+                data:
+                  $ref: '#/definitions/theme.ThemeVO'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/vo.Result'
+        "404":
+          description: 主题不存在
+          schema:
+            $ref: '#/definitions/vo.Result'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/vo.Result'
+      summary: 获取指定主题信息
+      tags:
+      - 主题
+  /theme/listAllThemes:
+    get:
+      consumes:
+      - application/json
+      description: 获取系统中所有可用的主题
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/vo.Result'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/theme.ThemeVO'
+                  type: array
+              type: object
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/vo.Result'
+      summary: 获取所有主题列表
+      tags:
+      - 主题
   /verification/sendEmailVerificationCode:
     get:
       consumes:

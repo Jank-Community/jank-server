@@ -132,17 +132,18 @@ func CreateOnePost(c echo.Context, req *dto.CreateOnePostRequest) (*post.PostsVO
 //   - interface{}: 获取到的文章视图对象
 //   - error: 操作过程中的错误
 func GetOnePostByID(c echo.Context, req *dto.GetOnePostRequest) (*post.PostsVO, error) {
-	pos, err := mapper.GetPostByID(c, req.ID)
+	postModel, err := mapper.GetPostByID(c, req.ID)
 	if err != nil {
 		utils.BizLogger(c).Errorf("根据 ID 获取文章失败: %v", err)
 		return nil, fmt.Errorf("根据 ID 获取文章失败: %w", err)
 	}
-	if pos == nil {
+
+	if postModel == nil {
 		utils.BizLogger(c).Errorf("文章不存在: %v", err)
 		return nil, fmt.Errorf("文章不存在: %w", err)
 	}
 
-	vo, err := utils.MapModelToVO(pos, &post.PostsVO{})
+	vo, err := utils.MapModelToVO(postModel, &post.PostsVO{})
 	if err != nil {
 		utils.BizLogger(c).Errorf("获取文章时映射 VO 失败: %v", err)
 		return nil, fmt.Errorf("获取文章时映射 VO 失败: %w", err)
@@ -150,7 +151,7 @@ func GetOnePostByID(c echo.Context, req *dto.GetOnePostRequest) (*post.PostsVO, 
 
 	postsVO := vo.(*post.PostsVO)
 
-	postCategory, err := mapper.GetPostCategory(c, pos.ID)
+	postCategory, err := mapper.GetPostCategory(c, postModel.ID)
 	if err != nil {
 		utils.BizLogger(c).Errorf("获取文章类目关联失败: %v", err)
 	}
@@ -172,14 +173,14 @@ func GetOnePostByID(c echo.Context, req *dto.GetOnePostRequest) (*post.PostsVO, 
 //   - map[string]interface{}: 包含文章列表、总页数和当前页数的映射
 //   - error: 操作过程中的错误
 func GetAllPostsWithPagingAndFormat(c echo.Context, page, pageSize int) (map[string]interface{}, error) {
-	posts, total, err := mapper.GetAllPostsWithPaging(c, page, pageSize)
+	postModels, total, err := mapper.GetAllPostsWithPaging(c, page, pageSize)
 	if err != nil {
 		utils.BizLogger(c).Errorf("获取文章列表失败: %v", err)
 		return nil, fmt.Errorf("获取文章列表失败: %w", err)
 	}
 
-	postResponse := make([]*post.PostsVO, len(posts))
-	for i, pos := range posts {
+	postResponse := make([]*post.PostsVO, len(postModels))
+	for i, pos := range postModels {
 		vo, err := utils.MapModelToVO(pos, &post.PostsVO{})
 		if err != nil {
 			utils.BizLogger(c).Errorf("获取文章列表时映射 VO 失败: %v", err)
@@ -224,8 +225,8 @@ func UpdateOnePost(c echo.Context, req *dto.UpdateOnePostRequest) (*post.PostsVO
 	var contentMarkdown string
 	var categoryID int64
 
-	pos, err := mapper.GetPostByID(c, req.ID)
-	if err != nil || pos == nil {
+	postModel, err := mapper.GetPostByID(c, req.ID)
+	if err != nil || postModel == nil {
 		utils.BizLogger(c).Errorf("获取文章失败: %v", err)
 		return nil, fmt.Errorf("获取文章失败: %w", err)
 	}
@@ -234,16 +235,16 @@ func UpdateOnePost(c echo.Context, req *dto.UpdateOnePostRequest) (*post.PostsVO
 	switch {
 	case contentType == "application/json":
 		if req.Title != "" {
-			pos.Title = req.Title
+			postModel.Title = req.Title
 		}
 		if req.Image != "" {
-			pos.Image = req.Image
+			postModel.Image = req.Image
 		}
-		pos.Visibility = req.Visibility
+		postModel.Visibility = req.Visibility
 		if req.ContentMarkdown != "" {
 			contentMarkdown = req.ContentMarkdown
-			pos.ContentMarkdown = contentMarkdown
-			pos.ContentHTML, err = utils.RenderMarkdown([]byte(contentMarkdown))
+			postModel.ContentMarkdown = contentMarkdown
+			postModel.ContentHTML, err = utils.RenderMarkdown([]byte(contentMarkdown))
 			if err != nil {
 				utils.BizLogger(c).Errorf("渲染 Markdown 失败: %v", err)
 				return nil, fmt.Errorf("渲染 Markdown 失败: %w", err)
@@ -268,8 +269,8 @@ func UpdateOnePost(c echo.Context, req *dto.UpdateOnePostRequest) (*post.PostsVO
 				return nil, fmt.Errorf("读取上传文件内容失败: %v", err)
 			}
 			contentMarkdown = string(content)
-			pos.ContentMarkdown = contentMarkdown
-			pos.ContentHTML, err = utils.RenderMarkdown([]byte(contentMarkdown))
+			postModel.ContentMarkdown = contentMarkdown
+			postModel.ContentHTML, err = utils.RenderMarkdown([]byte(contentMarkdown))
 			if err != nil {
 				utils.BizLogger(c).Errorf("渲染 Markdown 失败: %v", err)
 				return nil, fmt.Errorf("渲染 Markdown 失败: %w", err)
@@ -277,13 +278,13 @@ func UpdateOnePost(c echo.Context, req *dto.UpdateOnePostRequest) (*post.PostsVO
 		}
 
 		if title := c.FormValue("title"); title != "" {
-			pos.Title = title
+			postModel.Title = title
 		}
 		if image := c.FormValue("image"); image != "" {
-			pos.Image = image
+			postModel.Image = image
 		}
 		if visibility := c.FormValue("visibility"); visibility != "" {
-			pos.Visibility = visibility == "true"
+			postModel.Visibility = visibility == "true"
 		}
 		if categoryIDStr := c.FormValue("category_id"); categoryIDStr != "" {
 			id, err := strconv.ParseInt(categoryIDStr, 10, 64)
@@ -307,7 +308,7 @@ func UpdateOnePost(c echo.Context, req *dto.UpdateOnePostRequest) (*post.PostsVO
 	var postsVO *post.PostsVO
 
 	err = utils.RunDBTransaction(c, func(tx error) error {
-		if err := mapper.UpdateOnePostByID(c, req.ID, pos); err != nil {
+		if err := mapper.UpdateOnePostByID(c, req.ID, postModel); err != nil {
 			utils.BizLogger(c).Errorf("更新文章失败: %v", err)
 			return fmt.Errorf("更新文章失败: %w", err)
 		}
@@ -317,7 +318,7 @@ func UpdateOnePost(c echo.Context, req *dto.UpdateOnePostRequest) (*post.PostsVO
 			return fmt.Errorf("更新文章-类目关联失败: %w", err)
 		}
 
-		vo, err := utils.MapModelToVO(pos, &post.PostsVO{})
+		vo, err := utils.MapModelToVO(postModel, &post.PostsVO{})
 		if err != nil {
 			utils.BizLogger(c).Errorf("更新文章时映射 VO 失败: %v", err)
 			return fmt.Errorf("更新文章时映射 VO 失败: %w", err)

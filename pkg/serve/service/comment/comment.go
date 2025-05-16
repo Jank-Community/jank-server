@@ -27,19 +27,19 @@ func CreateComment(c echo.Context, req *dto.CreateCommentRequest) (*comment.Comm
 	var commentVO *comment.CommentsVO
 
 	err := utils.RunDBTransaction(c, func(tx error) error {
-		com := &model.Comment{
+		commentModel := &model.Comment{
 			Content:          req.Content,
 			UserId:           req.UserId,
 			PostId:           req.PostId,
 			ReplyToCommentId: req.ReplyToCommentId,
 		}
 
-		if err := mapper.CreateComment(c, com); err != nil {
+		if err := mapper.CreateComment(c, commentModel); err != nil {
 			utils.BizLogger(c).Errorf("创建评论失败：%v", err)
 			return fmt.Errorf("创建评论失败：%w", err)
 		}
 
-		vo, err := utils.MapModelToVO(com, &comment.CommentsVO{})
+		vo, err := utils.MapModelToVO(commentModel, &comment.CommentsVO{})
 		if err != nil {
 			utils.BizLogger(c).Errorf("创建评论时映射 VO 失败：%v", err)
 			return fmt.Errorf("创建评论时映射 VO 失败：%w", err)
@@ -65,7 +65,7 @@ func CreateComment(c echo.Context, req *dto.CreateCommentRequest) (*comment.Comm
 //   - *comment.CommentsVO: 评论及其回复的视图对象
 //   - error: 操作过程中的错误
 func GetCommentWithReplies(c echo.Context, req *dto.GetOneCommentRequest) (*comment.CommentsVO, error) {
-	com, err := mapper.GetCommentByID(c, req.CommentID)
+	commentModel, err := mapper.GetCommentByID(c, req.CommentID)
 	if err != nil {
 		utils.BizLogger(c).Errorf("获取评论失败：%v", err)
 		return nil, fmt.Errorf("获取评论失败：%w", err)
@@ -77,9 +77,9 @@ func GetCommentWithReplies(c echo.Context, req *dto.GetOneCommentRequest) (*comm
 		return nil, fmt.Errorf("获取子评论失败：%w", err)
 	}
 
-	com.Replies = replies
+	commentModel.Replies = replies
 
-	commentVO, err := utils.MapModelToVO(com, &comment.CommentsVO{})
+	commentVO, err := utils.MapModelToVO(commentModel, &comment.CommentsVO{})
 	if err != nil {
 		utils.BizLogger(c).Errorf("获取评论时映射 VO 失败：%v", err)
 		return nil, fmt.Errorf("获取评论时映射 VO 失败：%w", err)
@@ -97,7 +97,7 @@ func GetCommentWithReplies(c echo.Context, req *dto.GetOneCommentRequest) (*comm
 //   - []*comment.CommentsVO: 评论图结构列表
 //   - error: 操作过程中的错误
 func GetCommentGraphByPostID(c echo.Context, req *dto.GetCommentGraphRequest) ([]*comment.CommentsVO, error) {
-	comments, err := mapper.GetCommentsByPostID(c, req.PostID)
+	commentModels, err := mapper.GetCommentsByPostID(c, req.PostID)
 	if err != nil {
 		utils.BizLogger(c).Errorf("获取评论图失败：%v", err)
 		return nil, fmt.Errorf("获取评论图失败：%w", err)
@@ -106,25 +106,25 @@ func GetCommentGraphByPostID(c echo.Context, req *dto.GetCommentGraphRequest) ([
 	commentMap := make(map[int64]*comment.CommentsVO)
 	var rootCommentsVO []*comment.CommentsVO
 
-	for _, com := range comments {
-		commentVO, err := utils.MapModelToVO(com, &comment.CommentsVO{})
+	for _, commentModel := range commentModels {
+		commentVO, err := utils.MapModelToVO(commentModel, &comment.CommentsVO{})
 		if err != nil {
 			utils.BizLogger(c).Errorf("获取评论图时映射 VO 失败：%v", err)
 			return nil, fmt.Errorf("获取评论图时映射 VO 失败：%w", err)
 		}
 		vo := commentVO.(*comment.CommentsVO)
 		vo.Replies = make([]*comment.CommentsVO, 0)
-		commentMap[com.ID] = vo
+		commentMap[commentModel.ID] = vo
 
-		if com.ReplyToCommentId == 0 {
+		if commentModel.ReplyToCommentId == 0 {
 			rootCommentsVO = append(rootCommentsVO, vo)
 		}
 	}
 
-	for _, com := range comments {
-		if com.ReplyToCommentId != 0 {
-			if parentVO, exists := commentMap[com.ReplyToCommentId]; exists {
-				parentVO.Replies = append(parentVO.Replies, commentMap[com.ID])
+	for _, commentModel := range commentModels {
+		if commentModel.ReplyToCommentId != 0 {
+			if parentVO, exists := commentMap[commentModel.ReplyToCommentId]; exists {
+				parentVO.Replies = append(parentVO.Replies, commentMap[commentModel.ID])
 			}
 		}
 	}
@@ -164,19 +164,19 @@ func DeleteComment(c echo.Context, req *dto.DeleteCommentRequest) (*comment.Comm
 	var commentVO *comment.CommentsVO
 
 	err := utils.RunDBTransaction(c, func(tx error) error {
-		com, err := mapper.GetCommentByID(c, req.ID)
+		commentModel, err := mapper.GetCommentByID(c, req.ID)
 		if err != nil {
 			utils.BizLogger(c).Errorf("获取评论失败：%v", err)
 			return fmt.Errorf("评论不存在：%w", err)
 		}
 
-		com.Deleted = true
-		if err := mapper.UpdateComment(c, com); err != nil {
+		commentModel.Deleted = true
+		if err := mapper.UpdateComment(c, commentModel); err != nil {
 			utils.BizLogger(c).Errorf("软删除评论失败：%v", err)
 			return fmt.Errorf("软删除评论失败：%w", err)
 		}
 
-		vo, err := utils.MapModelToVO(com, &comment.CommentsVO{})
+		vo, err := utils.MapModelToVO(commentModel, &comment.CommentsVO{})
 		if err != nil {
 			utils.BizLogger(c).Errorf("软删除评论时映射 VO 失败：%v", err)
 			return fmt.Errorf("软删除评论时映射 VO 失败：%w", err)

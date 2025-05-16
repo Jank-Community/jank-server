@@ -38,4 +38,6 @@ func New(app *echo.Echo) {
 	routes.RegisterCategoryRoutes(api1)
 	// 注册评论相关的路由
 	routes.RegisterCommentRoutes(api1)
+	// 注册主题相关的路由
+	routes.RegisterThemeRoutes(api1)
 }

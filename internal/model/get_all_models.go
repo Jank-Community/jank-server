@@ -9,6 +9,7 @@ import (
 	category "jank.com/jank_blog/internal/model/category"
 	comment "jank.com/jank_blog/internal/model/comment"
 	post "jank.com/jank_blog/internal/model/post"
+	theme "jank.com/jank_blog/internal/model/theme"
 )
 
 // GetAllModels 获取并注册所有模型
@@ -27,6 +28,10 @@ func GetAllModels() []interface{} {
 
 		// comment 模块
 		&comment.Comment{},
+
+		// theme 模块
+		&theme.Theme{},
+		&theme.ThemeSetting{},
 
 		// association 跨模块中间表
 		&association.PostCategory{},

@@ -50,11 +50,10 @@ func initSwagger(app *echo.Echo) {
 		return
 	}
 
-	switch cfg.SwaggerConfig.SwaggerEnabled {
-	case "true":
+	if cfg.AppConfig.Swagger.SwaggerEnabled {
 		app.Use(swagger_middleware.InitSwagger())
 		global.SysLog.Info("Swagger 已启用")
-	default:
+	} else {
 		global.SysLog.Info("Swagger 已禁用")
 	}
 }

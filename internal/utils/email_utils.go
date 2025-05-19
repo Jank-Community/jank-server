@@ -41,12 +41,12 @@ func SendEmail(content string, toEmails []string) (bool, error) {
 	}
 
 	// 获取SMTP配置
-	emailType := config.AppConfig.EmailType
+	emailType := config.AppConfig.Email.EmailType
 	serverConfig := emailServers[emailType]
 
 	// 创建邮件
 	m := gomail.NewMessage()
-	m.SetHeader("From", config.AppConfig.FromEmail)
+	m.SetHeader("From", config.AppConfig.Email.FromEmail)
 	m.SetHeader("To", toEmails...)
 	m.SetHeader("Subject", EMAIL_SUBJECT)
 	m.SetBody("text/plain", content)
@@ -55,8 +55,8 @@ func SendEmail(content string, toEmails []string) (bool, error) {
 	d := gomail.NewDialer(
 		serverConfig.Server,
 		serverConfig.Port,
-		config.AppConfig.FromEmail,
-		config.AppConfig.EmailSmtp,
+		config.AppConfig.Email.FromEmail,
+		config.AppConfig.Email.EmailSmtp,
 	)
 
 	// 根据端口配置安全选项

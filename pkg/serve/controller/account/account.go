@@ -11,7 +11,6 @@ import (
 	bizErr "jank.com/jank_blog/internal/error"
 	"jank.com/jank_blog/internal/utils"
 	"jank.com/jank_blog/pkg/serve/controller/account/dto"
-	"jank.com/jank_blog/pkg/serve/controller/verification"
 	service "jank.com/jank_blog/pkg/serve/service/account"
 	"jank.com/jank_blog/pkg/vo"
 )
@@ -80,11 +79,11 @@ func RegisterAcc(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST, "请求参数校验失败")))
 	}
 
-	if !verification.VerifyImgCode(c, req.ImgVerificationCode, req.Email) {
+	if !utils.VerifyImgCode(c, req.ImgVerificationCode, req.Email) {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST, "图形验证码校验失败")))
 	}
 
-	if !verification.VerifyEmailCode(c, req.EmailVerificationCode, req.Email) {
+	if !utils.VerifyEmailCode(c, req.EmailVerificationCode, req.Email) {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST, "邮箱验证码校验失败")))
 	}
 
@@ -124,7 +123,7 @@ func LoginAccount(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST, "请求参数校验失败")))
 	}
 
-	if !verification.VerifyImgCode(c, req.ImgVerificationCode, req.Email) {
+	if !utils.VerifyImgCode(c, req.ImgVerificationCode, req.Email) {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST, "图形验证码校验失败")))
 	}
 
@@ -188,7 +187,7 @@ func ResetPassword(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST, "请求参数校验失败")))
 	}
 
-	if !verification.VerifyEmailCode(c, req.EmailVerificationCode, req.Email) {
+	if !utils.VerifyEmailCode(c, req.EmailVerificationCode, req.Email) {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST, "邮箱验证码校验失败")))
 	}
 

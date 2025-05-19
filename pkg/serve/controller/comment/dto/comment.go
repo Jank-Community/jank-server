@@ -14,3 +14,21 @@ type CreateCommentRequest struct {
 	PostId           int64  `json:"post_id" xml:"post_id" form:"post_id" query:"post_id" validate:"required"`
 	ReplyToCommentId int64  `json:"reply_to_comment_id" xml:"reply_to_comment_id" form:"reply_to_comment_id" query:"reply_to_comment_id" validate:"omitempty"`
 }
+
+// DeleteCommentRequest 删除评论请求
+// @Param id path int64 true "评论ID"
+type DeleteCommentRequest struct {
+	ID int64 `json:"id" xml:"id" form:"id" query:"id" validate:"required"`
+}
+
+// GetCommentGraphRequest 获取评论请求
+// @Param post_id path int true "帖子ID"
+type GetCommentGraphRequest struct {
+	PostID int64 `json:"post_id" xml:"post_id" form:"post_id" query:"post_id" validate:"required"`
+}
+
+// GetOneCommentRequest 获取评论请求
+// @Param comment_id path int true "评论ID"
+type GetOneCommentRequest struct {
+	CommentID int64 `json:"comment_id" xml:"comment_id" form:"comment_id" query:"comment_id" validate:"required"`
+}

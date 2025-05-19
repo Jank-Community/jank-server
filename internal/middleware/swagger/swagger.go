@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/labstack/echo/v4"
-	echoSwagger "github.com/swaggo/echo-swagger"
+	echo_swagger "github.com/swaggo/echo-swagger"
 
 	"jank.com/jank_blog/configs"
 	"jank.com/jank_blog/docs"
@@ -22,7 +22,7 @@ func InitSwagger() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			if strings.HasPrefix(c.Request().URL.Path, "/swagger/") {
-				return echoSwagger.WrapHandler(c)
+				return echo_swagger.WrapHandler(c)
 			}
 			return next(c)
 		}
@@ -41,7 +41,7 @@ func initSwagger() {
 		docs.SwaggerInfo.Title = "Jank Blog API"
 		docs.SwaggerInfo.Description = "这是 Jank Blog 的 API 文档，适用于账户管理、用户认证、角色权限管理，文章管理，类目管理、评论管理等功能。"
 		docs.SwaggerInfo.Version = "1.0"
-		docs.SwaggerInfo.Host = config.SwaggerConfig.SwaggerHost
+		docs.SwaggerInfo.Host = config.AppConfig.Swagger.SwaggerHost
 		if docs.SwaggerInfo.Host == "" {
 			docs.SwaggerInfo.Host = "localhost:9010"
 		}

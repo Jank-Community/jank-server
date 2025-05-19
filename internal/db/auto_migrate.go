@@ -1,25 +1,27 @@
+// Package db 提供数据库连接和管理功能
+// 创建者：Done-0
+// 创建时间：2025-05-10
 package db
 
 import (
-	"log"
+	"fmt"
 
 	"jank.com/jank_blog/internal/global"
 	"jank.com/jank_blog/internal/model"
 )
 
 // autoMigrate 执行数据库表结构自动迁移
-func autoMigrate() {
+func autoMigrate() error {
 	if global.DB == nil {
-		log.Fatal("数据库初始化失败，无法执行自动迁移...")
+		return fmt.Errorf("数据库初始化失败，无法执行自动迁移")
 	}
 
 	err := global.DB.AutoMigrate(
 		model.GetAllModels()...,
 	)
 	if err != nil {
-		log.Fatalf("数据库自动迁移失败: %v", err)
+		return fmt.Errorf("数据库自动迁移失败 %w", err)
 	}
 
-	log.Println("数据库自动迁移成功...")
-	global.SysLog.Infof("数据库自动迁移成功...")
+	return nil
 }

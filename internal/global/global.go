@@ -7,6 +7,7 @@ import (
 	"context"
 	"io"
 
+	"github.com/minio/minio-go/v7"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -20,6 +21,11 @@ var (
 // 缓存相关全局变量
 var (
 	RedisClient *redis.Client // 全局 redis 客户端对象，用于缓存操作
+)
+
+// MinioClient 全局 MinIO 客户端
+var (
+	MinioClient *minio.Client
 )
 
 // 日志相关全局变量

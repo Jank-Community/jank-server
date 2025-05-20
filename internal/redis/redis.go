@@ -6,6 +6,7 @@ package redis
 import (
 	"context"
 	"fmt"
+	"log"
 	"runtime"
 	"strconv"
 	"time"
@@ -22,11 +23,13 @@ import (
 func New(config *configs.Config) {
 	client := newRedisClient(config)
 	if err := client.Ping(context.Background()).Err(); err != nil {
+		log.Printf("Redis 连接失败: %v", err)
 		global.SysLog.Errorf("Redis 连接失败: %v", err)
 		return
 	}
 	global.RedisClient = client
-	global.SysLog.Infof("Redis 连接成功!")
+	log.Println("Redis 连接成功...")
+	global.SysLog.Infof("Redis 连接成功...")
 }
 
 // newRedisClient 创建新的Redis客户端

@@ -5,6 +5,7 @@ package db
 
 import (
 	"fmt"
+	"log"
 
 	"jank.com/jank_blog/internal/global"
 	"jank.com/jank_blog/internal/model"
@@ -12,16 +13,15 @@ import (
 
 // autoMigrate 执行数据库表结构自动迁移
 func autoMigrate() error {
-	if global.DB == nil {
-		return fmt.Errorf("数据库初始化失败，无法执行自动迁移")
-	}
-
 	err := global.DB.AutoMigrate(
 		model.GetAllModels()...,
 	)
 	if err != nil {
 		return fmt.Errorf("数据库自动迁移失败 %w", err)
 	}
+
+	log.Println("数据库自动迁移成功...")
+	global.SysLog.Info("数据库自动迁移成功...")
 
 	return nil
 }

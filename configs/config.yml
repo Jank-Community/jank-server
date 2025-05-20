@@ -1,22 +1,23 @@
 # 应用相关
 APP:
   APP_NAME: "JANK_BLOG"
-  APP_HOST: "127.0.0.1" # 如果使用docker，则改为"0.0.0.0"
+  APP_HOST: "127.0.0.1" # 如果使用 docker，则改为"0.0.0.0"
   APP_PORT: "9010"
   # 邮箱相关
-  EMAIL: 
+  EMAIL:
     EMAIL_TYPE: "qq" # 支持的邮箱类型: qq, gmail, outlook
     FROM_EMAIL: "<FROM_EMAIL>" # 发件人邮箱
     EMAIL_SMTP: "<EMAIL_SMTP>" # SMTP 授权码
   # Swagger 相关
   SWAGGER:
     SWAGGER_HOST: "127.0.0.1:9010"
-    SWAGGER_ENABLED: true # 是否启用Swagger，可选值: true, false
+    SWAGGER_ENABLED: true # 是否启用 Swagger，可选值: true, false
 
+# 数据库相关
 DATABASE:
   DB_DIALECT: "postgres" # 数据库类型, 可选值: postgres, mysql, sqlite
   DB_NAME: "jank_db"
-  DB_HOST: "127.0.0.1" # 如果使用docker，则改为"postgres_db"
+  DB_HOST: "127.0.0.1" # 如果使用 docker，则改为"postgres_db"
   DB_PORT: "5432"
   DB_USER: "<DATABASE_USER>"
   DB_PSW: "<DATABASE_PASSWORD>"
@@ -24,10 +25,19 @@ DATABASE:
 
 # Redis 相关
 REDIS:
-  REDIS_HOST: "127.0.0.1" # 如果使用docker，则改为"redis_db"
+  REDIS_HOST: "127.0.0.1" # 如果使用 docker，则改为"redis_db"
   REDIS_PORT: "6379"
   REDIS_DB: "0"
   REDIS_PSW: ""
+
+# MinIO 对象存储相关
+MINIO:
+  MINIO_HOST: "127.0.0.1" # 如果使用 docker，则改为"minio_server"
+  MINIO_PORT: "9001" # MinIO 服务端口
+  MINIO_ACCESS_KEY: "2EGruziH9sx4L7zItUHU"  # MinIO 访问密钥
+  MINIO_SECRET_KEY: "gwHXgjdaMEvVKcLD672D7rplVVcioPfzMLhsI9JK" # MinIO 密钥
+  MINIO_SESSION_TOKEN: "" # MinIO 临时安全凭证（可选，通常为空字符串）
+  MINIO_USE_SSL: false # 是否启用 SSL
 
 # 日志相关
 LOG:

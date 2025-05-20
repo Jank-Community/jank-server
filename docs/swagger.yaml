@@ -101,12 +101,40 @@ definitions:
     required:
     - title
     type: object
+  dto.DeleteOneFileRequest:
+    properties:
+      bucket_name:
+        maxLength: 63
+        minLength: 1
+        type: string
+      object_name:
+        maxLength: 1024
+        minLength: 1
+        type: string
+    required:
+    - bucket_name
+    - object_name
+    type: object
   dto.DeleteOnePostRequest:
     properties:
       id:
         type: integer
     required:
     - id
+    type: object
+  dto.DownloadOneFileRequest:
+    properties:
+      bucket_name:
+        maxLength: 63
+        minLength: 1
+        type: string
+      object_name:
+        maxLength: 1024
+        minLength: 1
+        type: string
+    required:
+    - bucket_name
+    - object_name
     type: object
   dto.GetAccountRequest:
     description: 请求获取账户信息时所需参数
@@ -121,6 +149,18 @@ definitions:
       id:
         default: 0
         type: integer
+    type: object
+  dto.ListAllObjectsRequest:
+    properties:
+      bucket_name:
+        maxLength: 63
+        minLength: 1
+        type: string
+      prefix:
+        maxLength: 1024
+        type: string
+    required:
+    - bucket_name
     type: object
   dto.LoginRequest:
     description: 用户登录请求所需参数
@@ -762,6 +802,168 @@ paths:
       summary: 获取评论图
       tags:
       - 评论
+  /oss/deleteFile:
+    post:
+      consumes:
+      - application/json
+      description: 从 MinIO 对象存储删除文件
+      parameters:
+      - description: 删除文件请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.DeleteOneFileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/vo.Result'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/vo.Result'
+        "404":
+          description: 文件不存在
+          schema:
+            $ref: '#/definitions/vo.Result'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/vo.Result'
+      security:
+      - BearerAuth: []
+      summary: 删除文件
+      tags:
+      - 对象存储
+  /oss/downloadFile:
+    post:
+      consumes:
+      - application/json
+      description: 从 MinIO 对象存储下载文件
+      parameters:
+      - description: 下载文件请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.DownloadOneFileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 下载成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/vo.Result'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/vo.Result'
+        "404":
+          description: 文件不存在
+          schema:
+            $ref: '#/definitions/vo.Result'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/vo.Result'
+      security:
+      - BearerAuth: []
+      summary: 下载文件
+      tags:
+      - 对象存储
+  /oss/listObjects:
+    post:
+      consumes:
+      - application/json
+      description: 列出 MinIO 对象存储中的文件
+      parameters:
+      - description: 列出对象请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ListAllObjectsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/vo.Result'
+            - properties:
+                data:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/vo.Result'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/vo.Result'
+      security:
+      - BearerAuth: []
+      summary: 列出对象
+      tags:
+      - 对象存储
+  /oss/uploadFile:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 上传文件到 MinIO 对象存储
+      parameters:
+      - description: 要上传的文件
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: 存储桶名称
+        in: formData
+        name: bucket_name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 上传成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/vo.Result'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/vo.Result'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/vo.Result'
+      security:
+      - BearerAuth: []
+      summary: 上传文件
+      tags:
+      - 对象存储
   /post/createOnePost:
     post:
       consumes:

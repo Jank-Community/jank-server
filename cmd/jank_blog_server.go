@@ -14,6 +14,7 @@ import (
 	"jank.com/jank_blog/internal/db"
 	"jank.com/jank_blog/internal/logger"
 	"jank.com/jank_blog/internal/middleware"
+	"jank.com/jank_blog/internal/oss"
 	"jank.com/jank_blog/internal/redis"
 	"jank.com/jank_blog/pkg/router"
 )
@@ -48,6 +49,9 @@ func Start() {
 
 	// 初始化 Redis 连接
 	redis.New(config)
+
+	// 初始化 MinIO 客户端
+	oss.New(config)
 
 	// 注册路由
 	router.New(app)

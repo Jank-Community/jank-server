@@ -54,7 +54,7 @@ func New(config *configs.Config) {
 	}
 
 	log.Printf("「%s」数据库连接成功...", config.DBConfig.DBName)
-	global.SysLog.Infof("「%s」数据库连接成功！", config.DBConfig.DBName)
+	global.SysLog.Infof("「%s」数据库连接成功...", config.DBConfig.DBName)
 
 	err = autoMigrate()
 	if err != nil {

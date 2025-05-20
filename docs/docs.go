@@ -854,6 +854,278 @@ const docTemplate = `{
                 }
             }
         },
+        "/oss/deleteFile": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "从 MinIO 对象存储删除文件",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "对象存储"
+                ],
+                "summary": "删除文件",
+                "parameters": [
+                    {
+                        "description": "删除文件请求参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.DeleteOneFileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/vo.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    },
+                    "404": {
+                        "description": "文件不存在",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    }
+                }
+            }
+        },
+        "/oss/downloadFile": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "从 MinIO 对象存储下载文件",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "对象存储"
+                ],
+                "summary": "下载文件",
+                "parameters": [
+                    {
+                        "description": "下载文件请求参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.DownloadOneFileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "下载成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/vo.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    },
+                    "404": {
+                        "description": "文件不存在",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    }
+                }
+            }
+        },
+        "/oss/listObjects": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "列出 MinIO 对象存储中的文件",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "对象存储"
+                ],
+                "summary": "列出对象",
+                "parameters": [
+                    {
+                        "description": "列出对象请求参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListAllObjectsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/vo.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    }
+                }
+            }
+        },
+        "/oss/uploadFile": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "上传文件到 MinIO 对象存储",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "对象存储"
+                ],
+                "summary": "上传文件",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "要上传的文件",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "存储桶名称",
+                        "name": "bucket_name",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "上传成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/vo.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    }
+                }
+            }
+        },
         "/post/createOnePost": {
             "post": {
                 "security": [
@@ -1621,6 +1893,25 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.DeleteOneFileRequest": {
+            "type": "object",
+            "required": [
+                "bucket_name",
+                "object_name"
+            ],
+            "properties": {
+                "bucket_name": {
+                    "type": "string",
+                    "maxLength": 63,
+                    "minLength": 1
+                },
+                "object_name": {
+                    "type": "string",
+                    "maxLength": 1024,
+                    "minLength": 1
+                }
+            }
+        },
         "dto.DeleteOnePostRequest": {
             "type": "object",
             "required": [
@@ -1629,6 +1920,25 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "type": "integer"
+                }
+            }
+        },
+        "dto.DownloadOneFileRequest": {
+            "type": "object",
+            "required": [
+                "bucket_name",
+                "object_name"
+            ],
+            "properties": {
+                "bucket_name": {
+                    "type": "string",
+                    "maxLength": 63,
+                    "minLength": 1
+                },
+                "object_name": {
+                    "type": "string",
+                    "maxLength": 1024,
+                    "minLength": 1
                 }
             }
         },
@@ -1650,6 +1960,23 @@ const docTemplate = `{
                 "id": {
                     "type": "integer",
                     "default": 0
+                }
+            }
+        },
+        "dto.ListAllObjectsRequest": {
+            "type": "object",
+            "required": [
+                "bucket_name"
+            ],
+            "properties": {
+                "bucket_name": {
+                    "type": "string",
+                    "maxLength": 63,
+                    "minLength": 1
+                },
+                "prefix": {
+                    "type": "string",
+                    "maxLength": 1024
                 }
             }
         },

@@ -64,12 +64,23 @@ type LogConfig struct {
 	LogLevel        string `mapstructure:"LOG_LEVEL"`
 }
 
+// MinioConfig MinIO对象存储配置
+type MinioConfig struct {
+	MinioHost         string `mapstructure:"MINIO_HOST"`
+	MinioPort         string `mapstructure:"MINIO_PORT"`
+	MinioAccessKey    string `mapstructure:"MINIO_ACCESS_KEY"`
+	MinioSecretKey    string `mapstructure:"MINIO_SECRET_KEY"`
+	MinioUseSsl       bool   `mapstructure:"MINIO_USE_SSL"`
+	MinioSessionToken string `mapstructure:"MINIO_SESSION_TOKEN"`
+}
+
 // Config 总配置结构
 type Config struct {
 	AppConfig   AppConfig      `mapstructure:"APP"`
 	DBConfig    DatabaseConfig `mapstructure:"DATABASE"`
 	RedisConfig RedisConfig    `mapstructure:"REDIS"`
 	LogConfig   LogConfig      `mapstructure:"LOG"`
+	MinioConfig MinioConfig    `mapstructure:"MINIO"`
 }
 
 // DefaultConfigPath 默认配置文件路径

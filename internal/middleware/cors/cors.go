@@ -32,10 +32,43 @@ type corsConfig struct {
 //   - corsConfig: CORS 配置
 func defaultCORSConfig() corsConfig {
 	return corsConfig{
-		AllowedOrigins:   []string{"*"},                                                                                                   // 默认允许所有域名
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},                                                             // 默认允许的请求方法
-		AllowedHeaders:   []string{"Content-Type", "Authorization", "X-Client-Info", "X-Client-Version", "X-Client-Data", "X-Request-Id"}, // 默认允许的请求头
-		AllowCredentials: false,                                                                                                           // 默认不允许携带证书
+		AllowedOrigins: []string{"*"},                                       // 默认允许所有域名
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}, // 默认允许的请求方法
+		AllowedHeaders: []string{
+			// 标准 HTTP 请求头
+			"Accept",          // 接受的响应类型
+			"Accept-Encoding", // 接受的编码方式
+			"Accept-Language", // 接受的语言
+			"Connection",      // 连接类型
+			"Content-Length",  // 内容长度
+			"Content-Type",    // 内容类型
+			"Host",            // 主机信息
+			"Origin",          // 请求源
+			"Referer",         // 来源页面
+			"User-Agent",      // 用户代理
+
+			// 认证与安全
+			"Authorization", // 认证信息
+			"Refresh-Token", // 刷新令牌
+			"Cookie",        // Cookie 信息
+
+			// 缓存控制
+			"Cache-Control",       // 缓存控制
+			"Pragma",              // 缓存指令
+			"If-Match",            // 条件请求
+			"If-None-Match",       // 条件请求
+			"If-Modified-Since",   // 条件请求
+			"If-Unmodified-Since", // 条件请求
+
+			// 业务与追踪
+			"Language",         // 语言偏好
+			"Timezone",         // 时区信息
+			"Platform",         // 平台信息
+			"App-Version",      // 应用版本
+			"Request-Id",       // 请求追踪
+			"X-Requested-With", // AJAX 请求标识
+		},
+		AllowCredentials: false, // 默认不允许携带证书
 	}
 }
 

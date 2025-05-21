@@ -26,7 +26,7 @@ type JWTConfig struct {
 var DefaultJWTConfig = JWTConfig{
 	Authorization: "Authorization",
 	TokenPrefix:   "Bearer ",
-	RefreshToken:  "REFRESH_TOKEN",
+	RefreshToken:  "Refresh-Token",
 	UserCache:     "USER_CACHE",
 }
 
@@ -36,39 +36,42 @@ var DefaultJWTConfig = JWTConfig{
 func AuthMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			// 从请求头中提取 Access Token
-			authHeader := c.Request().Header.Get(DefaultJWTConfig.Authorization)
-			if authHeader == "" {
-				return echo.NewHTTPError(http.StatusUnauthorized, "缺少 Authorization 请求头")
+			// 从请求头中提取 Access-Token
+			AuthorizationHeader := c.Request().Header.Get(DefaultJWTConfig.Authorization)
+			if AuthorizationHeader == "" {
+				return echo.NewHTTPError(http.StatusUnauthorized, "Authorization 请求头缺失")
 			}
-			tokenString := strings.TrimPrefix(authHeader, DefaultJWTConfig.TokenPrefix)
+			tokenString := strings.TrimPrefix(AuthorizationHeader, DefaultJWTConfig.TokenPrefix)
 
-			// 验证 JWT Token；若验证失败则尝试使用 Refresh Token 刷新
+			// 验证 Access-Token；若 Access-Token 已过期或无效，则尝试使用 Refresh Token 刷新
 			_, err := utils.ValidateJWTToken(tokenString, false)
 			if err != nil {
-				refreshHeader := c.Request().Header.Get(DefaultJWTConfig.RefreshToken)
-				if refreshHeader == "" {
-					return echo.NewHTTPError(http.StatusUnauthorized, "无效 Access Token，请重新登录")
+				refreshTokenHeader := c.Request().Header.Get(DefaultJWTConfig.RefreshToken)
+				if refreshTokenHeader == "" {
+					return echo.NewHTTPError(http.StatusUnauthorized, "Access-Token 已过期，请提供 Refresh-Token")
 				}
-				refreshTokenString := strings.TrimPrefix(refreshHeader, DefaultJWTConfig.TokenPrefix)
-				newTokens, refreshErr := utils.RefreshTokenLogic(refreshTokenString)
-				if refreshErr != nil {
-					return echo.NewHTTPError(http.StatusUnauthorized, "无效 Access 和 Refresh Token，请重新登录")
+
+				newTokens, err := utils.RefreshTokenLogic(refreshTokenHeader)
+				if err != nil {
+					return echo.NewHTTPError(http.StatusUnauthorized, "Refresh-Token 无效或已过期，请重新登录")
 				}
-				c.Response().Header().Set(DefaultJWTConfig.Authorization, DefaultJWTConfig.TokenPrefix+newTokens["accessToken"])
-				c.Response().Header().Set(DefaultJWTConfig.RefreshToken, DefaultJWTConfig.TokenPrefix+newTokens["refreshToken"])
-				tokenString = newTokens["accessToken"]
+
+				// 设置新的 Access-Token 和 Refresh-Token 到响应头 Authorization 和 Refresh-Token
+				c.Response().Header().Set(DefaultJWTConfig.Authorization, DefaultJWTConfig.TokenPrefix+newTokens["Authorization"])
+				c.Response().Header().Set(DefaultJWTConfig.RefreshToken, newTokens["Refresh-Token"])
+				tokenString = newTokens["Authorization"]
 			}
 
-			// 从 Token 中解析 accountID
-			accountID, err := utils.ParseAccountAndRoleIDFromJWT(tokenString)
+			// 从 access_token 中解析 accountID
+			accountID, err := utils.ParseAccountFromJWT(tokenString)
 			if err != nil {
-				return echo.NewHTTPError(http.StatusUnauthorized, "无效的 Access Token，请重新登录")
+				return echo.NewHTTPError(http.StatusUnauthorized, "Access-Token 解析失败，请重新登录")
 			}
 
+			// 检验会话有效性
 			sessionCacheKey := fmt.Sprintf("%s:%d", DefaultJWTConfig.UserCache, accountID)
 			if sessionVal, err := global.RedisClient.Get(c.Request().Context(), sessionCacheKey).Result(); err != nil || sessionVal == "" {
-				return echo.NewHTTPError(http.StatusUnauthorized, "无效会话，请重新登录")
+				return echo.NewHTTPError(http.StatusUnauthorized, "会话已失效，请重新登录")
 			}
 
 			return next(c)

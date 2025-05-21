@@ -181,7 +181,7 @@ func LogoutAcc(c echo.Context) error {
 	logoutLock.Lock()
 	defer logoutLock.Unlock()
 
-	accountID, err := utils.ParseAccountAndRoleIDFromJWT(c.Request().Header.Get("Authorization"))
+	accountID, err := utils.ParseAccountFromJWT(c.Request().Header.Get("Authorization"))
 	if err != nil {
 		utils.BizLogger(c).Errorf("解析 access token 失败: %v", err)
 		return fmt.Errorf("解析 access token 失败: %w", err)
@@ -214,7 +214,7 @@ func ResetPassword(c echo.Context, req *dto.ResetPwdRequest) error {
 			return fmt.Errorf("两次密码输入不一致")
 		}
 
-		accountID, err := utils.ParseAccountAndRoleIDFromJWT(c.Request().Header.Get("Authorization"))
+		accountID, err := utils.ParseAccountFromJWT(c.Request().Header.Get("Authorization"))
 		if err != nil {
 			utils.BizLogger(c).Errorf("解析 token 失败: %v", err)
 			return fmt.Errorf("解析 token 失败: %w", err)

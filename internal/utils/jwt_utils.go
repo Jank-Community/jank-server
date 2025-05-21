@@ -103,22 +103,22 @@ func RefreshTokenLogic(refreshTokenString string) (map[string]string, error) {
 		}
 
 		return map[string]string{
-			"accessToken":  newAccessToken,
-			"refreshToken": newRefreshToken,
+			"Authorization": newAccessToken,
+			"Refresh-Token": newRefreshToken,
 		}, nil
 	}
 
 	return nil, fmt.Errorf("refresh token 验证失败")
 }
 
-// ParseAccountAndRoleIDFromJWT 从 JWT 中提取 accountID 和 roleID
+// ParseAccountFromJWT 从 JWT 中提取 accountID
 // 参数：
 //   - tokenString: 令牌字符串
 //
 // 返回值：
 //   - int64: 账户ID
 //   - error: 解析过程中的错误
-func ParseAccountAndRoleIDFromJWT(tokenString string) (int64, error) {
+func ParseAccountFromJWT(tokenString string) (int64, error) {
 	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
 	token, err := ValidateJWTToken(tokenString, false)

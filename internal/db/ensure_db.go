@@ -6,6 +6,8 @@ package db
 import (
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 
 	"gorm.io/gorm"
 
@@ -26,6 +28,8 @@ func ensureDBExists(db *gorm.DB, config *configs.Config) error {
 		return ensurePostgresDBExists(db, config.DBConfig.DBName, config.DBConfig.DBUser)
 	case DIALECT_MYSQL:
 		return ensureMySQLDBExists(db, config.DBConfig.DBName)
+	case DIALECT_SQLITE:
+		return ensureSQLiteDBExists(config)
 	default:
 		return nil
 	}
@@ -67,20 +71,50 @@ func ensurePostgresDBExists(db *gorm.DB, dbName, dbUser string) error {
 // 返回值：
 //   - error: 创建过程中的错误
 func ensureMySQLDBExists(db *gorm.DB, dbName string) error {
-	var count int64
-	query := "SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name = ?"
-	if err := db.Raw(query, dbName).Scan(&count).Error; err != nil {
+	var exists bool
+	query := "SELECT EXISTS (SELECT 1 FROM information_schema.schemata WHERE schema_name = ?)"
+	if err := db.Raw(query, dbName).Scan(&exists).Error; err != nil {
 		log.Printf("查询「%s」数据库是否存在时失败: %v", dbName, err)
 		return fmt.Errorf("查询「%s」数据库是否存在时失败: %v", dbName, err)
 	}
 
-	if count == 0 {
+	if !exists {
 		log.Printf("「%s」数据库不存在，正在创建...", dbName)
 		global.SysLog.Infof("「%s」数据库不存在，正在创建...", dbName)
+
 		createSQL := fmt.Sprintf("CREATE DATABASE `%s` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci", dbName)
 		if err := db.Exec(createSQL).Error; err != nil {
 			return fmt.Errorf("创建「%s」数据库失败: %v", dbName, err)
 		}
 	}
+	return nil
+}
+
+// ensureSQLiteDBExists 确保 SQLite 数据库存在，不存在则创建
+// 参数：
+//   - config: 应用配置
+//
+// 返回值：
+//   - error: 创建过程中的错误
+func ensureSQLiteDBExists(config *configs.Config) error {
+	dbPath := filepath.Join(config.DBConfig.DBPath, config.DBConfig.DBName+".db")
+
+	if err := os.MkdirAll(config.DBConfig.DBPath, os.ModePerm); err != nil {
+		log.Printf("创建 SQLite 数据库目录失败: %v", err)
+		return fmt.Errorf("创建 SQLite 数据库目录失败: %v", err)
+	}
+
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+		log.Printf("「%s」数据库不存在，正在创建...", config.DBConfig.DBName)
+		global.SysLog.Infof("「%s」数据库不存在，正在创建...", config.DBConfig.DBName)
+
+		file, err := os.Create(dbPath)
+		if err != nil {
+			log.Printf("创建「%s」数据库失败: %v", config.DBConfig.DBName, err)
+			return fmt.Errorf("创建「%s」数据库失败: %v", config.DBConfig.DBName, err)
+		}
+		file.Close()
+	}
+
 	return nil
 }

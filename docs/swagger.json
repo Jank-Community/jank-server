@@ -321,6 +321,75 @@
                 }
             }
         },
+        "/account/updateAccount": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "更新当前登录用户的账户信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "账户"
+                ],
+                "summary": "更新账户信息",
+                "parameters": [
+                    {
+                        "description": "更新账户信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateAccountRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/vo.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/account.UpdateAccountVO"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    }
+                }
+            }
+        },
         "/category/createOneCategory": {
             "post": {
                 "security": [
@@ -1741,6 +1810,9 @@
             "description": "请求获取账户信息时所需参数",
             "type": "object",
             "properties": {
+                "avatar": {
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
                 },
@@ -1760,6 +1832,24 @@
                     "type": "string"
                 },
                 "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "account.UpdateAccountVO": {
+            "description": "更新账户信息后返回的参数",
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "nickname": {
+                    "type": "string"
+                },
+                "phone": {
                     "type": "string"
                 }
             }
@@ -2053,6 +2143,26 @@
                     "type": "string",
                     "maxLength": 20,
                     "minLength": 6
+                }
+            }
+        },
+        "dto.UpdateAccountRequest": {
+            "description": "用户更新账户信息所需参数",
+            "type": "object",
+            "required": [
+                "nickname"
+            ],
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "nickname": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 1
+                },
+                "phone": {
+                    "type": "string"
                 }
             }
         },

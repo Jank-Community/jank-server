@@ -8,10 +8,12 @@ package account
 // @Property			email	    body	string	true	"用户邮箱"
 // @Property			nickname	body	string	true	"用户昵称"
 // @Property			phone	    body	string	true	"用户手机号"
+// @Property			avatar	    body	string	true	"用户头像"
 type GetAccountVO struct {
 	Nickname string `json:"nickname"`
 	Email    string `json:"email"`
 	Phone    string `json:"phone"`
+	Avatar   string `json:"avatar"`
 }
 
 // LoginVO           返回给前端的登录信息
@@ -31,4 +33,17 @@ type LoginVO struct {
 type RegisterAccountVO struct {
 	Nickname string `json:"nickname"`
 	Email    string `json:"email"`
+}
+
+// UpdateAccountVO     更新账户信息响应体
+// @Description	更新账户信息后返回的参数
+// @Property			nickname	body	string	true	"用户昵称"
+// @Property			email	    body	string	true	"用户邮箱"
+// @Property			phone	    body	string	true	"用户手机号"
+// @Property			avatar	    body	string	true	"用户头像"
+type UpdateAccountVO struct {
+	Nickname string `json:"nickname"`
+	Email    string `json:"email"`
+	Phone    string `json:"phone"`
+	Avatar   string `json:"avatar"`
 }

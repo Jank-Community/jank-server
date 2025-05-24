@@ -15,41 +15,6 @@ import (
 	"jank.com/jank_blog/pkg/vo"
 )
 
-// GetAccount godoc
-// @Summary      获取账户信息
-// @Description  根据提供的邮箱获取对应用户的详细信息
-// @Tags         账户
-// @Accept       json
-// @Produce      json
-// @Param        request  body      dto.GetAccountRequest  true  "获取账户请求参数"
-// @Success      200     {object}   vo.Result{data=account.GetAccountVO}  "获取成功"
-// @Failure      400     {object}   vo.Result              "请求参数错误"
-// @Failure      404     {object}   vo.Result              "用户不存在"
-// @Router       /account/getAccount [post]
-// 参数：
-//   - c: Echo 上下文
-//
-// 返回值：
-//   - error: 操作过程中的错误
-func GetAccount(c echo.Context) error {
-	req := new(dto.GetAccountRequest)
-	if err := c.Bind(req); err != nil {
-		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
-	}
-
-	errors := utils.Validator(*req)
-	if errors != nil {
-		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST, "请求参数校验失败")))
-	}
-
-	response, err := service.GetAccount(c, req)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, vo.Fail(c, err, bizErr.New(bizErr.SERVER_ERR, err.Error())))
-	}
-
-	return c.JSON(http.StatusOK, vo.Success(c, response))
-}
-
 // RegisterAcc godoc
 // @Summary      用户注册
 // @Description  注册新用户账号，支持图形验证码和邮箱验证码校验
@@ -128,6 +93,78 @@ func LoginAccount(c echo.Context) error {
 	}
 
 	response, err := service.LoginAcc(c, req)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, vo.Fail(c, err, bizErr.New(bizErr.SERVER_ERR, err.Error())))
+	}
+
+	return c.JSON(http.StatusOK, vo.Success(c, response))
+}
+
+// GetAccount godoc
+// @Summary      获取账户信息
+// @Description  根据提供的邮箱获取对应用户的详细信息
+// @Tags         账户
+// @Accept       json
+// @Produce      json
+// @Param        request  body      dto.GetAccountRequest  true  "获取账户请求参数"
+// @Success      200     {object}   vo.Result{data=account.GetAccountVO}  "获取成功"
+// @Failure      400     {object}   vo.Result              "请求参数错误"
+// @Failure      404     {object}   vo.Result              "用户不存在"
+// @Router       /account/getAccount [post]
+// 参数：
+//   - c: Echo 上下文
+//
+// 返回值：
+//   - error: 操作过程中的错误
+func GetAccount(c echo.Context) error {
+	req := new(dto.GetAccountRequest)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
+	}
+
+	errors := utils.Validator(*req)
+	if errors != nil {
+		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST, "请求参数校验失败")))
+	}
+
+	response, err := service.GetAccount(c, req)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, vo.Fail(c, err, bizErr.New(bizErr.SERVER_ERR, err.Error())))
+	}
+
+	return c.JSON(http.StatusOK, vo.Success(c, response))
+}
+
+// UpdateAccount godoc
+// @Summary      更新账户信息
+// @Description  更新当前登录用户的账户信息
+// @Tags         账户
+// @Accept       json
+// @Produce      json
+// @Param        request  body      dto.UpdateAccountRequest  true  "更新账户信息"
+// @Success      200     {object}   vo.Result{data=account.UpdateAccountVO}  "更新成功"
+// @Failure      400     {object}   vo.Result              "请求参数错误"
+// @Failure      401     {object}   vo.Result              "未授权"
+// @Failure      500     {object}   vo.Result              "服务器错误"
+// @Security     BearerAuth
+// @Router       /account/updateAccount [post]
+// 参数：
+//   - c: Echo 上下文
+//
+// 返回值：
+//   - error: 操作过程中的错误
+func UpdateAccount(c echo.Context) error {
+	req := new(dto.UpdateAccountRequest)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
+	}
+
+	errors := utils.Validator(*req)
+	if errors != nil {
+		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST, "请求参数校验失败")))
+	}
+
+	response, err := service.UpdateAccount(c, req)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, vo.Fail(c, err, bizErr.New(bizErr.SERVER_ERR, err.Error())))
 	}

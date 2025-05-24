@@ -42,8 +42,8 @@ const (
 func GetAccount(c echo.Context, req *dto.GetAccountRequest) (*account.GetAccountVO, error) {
 	userInfo, err := mapper.GetAccountByEmail(c, req.Email)
 	if err != nil {
-		utils.BizLogger(c).Errorf("「%s」邮箱不存在", req.Email)
-		return nil, fmt.Errorf("「%s」邮箱不存在", req.Email)
+		utils.BizLogger(c).Errorf("「%s」用户不存在", req.Email)
+		return nil, fmt.Errorf("「%s」用户不存在", req.Email)
 	}
 
 	vo, err := utils.MapModelToVO(userInfo, &account.GetAccountVO{})
@@ -139,14 +139,14 @@ func LoginAcc(c echo.Context, req *dto.LoginRequest) (*account.LoginVO, error) {
 
 	err = bcrypt.CompareHashAndPassword([]byte(acc.Password), []byte(req.Password))
 	if err != nil {
-		utils.BizLogger(c).Errorf("密码输入错误: %v", err)
-		return nil, fmt.Errorf("密码输入错误: %w", err)
+		utils.BizLogger(c).Errorf("「%s」用户密码输入错误: %v", acc.Email, err)
+		return nil, fmt.Errorf("「%s」用户密码输入错误: %w", acc.Email, err)
 	}
 
 	accessTokenString, refreshTokenString, err := utils.GenerateJWT(acc.ID)
 	if err != nil {
-		utils.BizLogger(c).Errorf("token 生成失败: %v", err)
-		return nil, fmt.Errorf("token 生成失败: %w", err)
+		utils.BizLogger(c).Errorf("access_token 生成失败: %v", err)
+		return nil, fmt.Errorf("access_token 生成失败: %w", err)
 	}
 
 	cacheKey := fmt.Sprintf("%s:%d", USER_CACHE, acc.ID)
@@ -183,8 +183,8 @@ func LogoutAcc(c echo.Context) error {
 
 	accountID, err := utils.ParseAccountFromJWT(c.Request().Header.Get("Authorization"))
 	if err != nil {
-		utils.BizLogger(c).Errorf("解析 access token 失败: %v", err)
-		return fmt.Errorf("解析 access token 失败: %w", err)
+		utils.BizLogger(c).Errorf("access_token 解析失败: %v", err)
+		return fmt.Errorf("access_token 解析失败: %w", err)
 	}
 
 	cacheKey := fmt.Sprintf("%s:%d", USER_CACHE, accountID)
@@ -216,28 +216,78 @@ func ResetPassword(c echo.Context, req *dto.ResetPwdRequest) error {
 
 		accountID, err := utils.ParseAccountFromJWT(c.Request().Header.Get("Authorization"))
 		if err != nil {
-			utils.BizLogger(c).Errorf("解析 token 失败: %v", err)
-			return fmt.Errorf("解析 token 失败: %w", err)
+			utils.BizLogger(c).Errorf("access_token 解析失败: %v", err)
+			return fmt.Errorf("access_token 解析失败: %w", err)
 		}
 
 		acc, err := mapper.GetAccountByAccountID(c, accountID)
 		if err != nil {
-			utils.BizLogger(c).Errorf("「%s」用户不存在: %v", req.Email, err)
-			return fmt.Errorf("「%s」用户不存在: %w", req.Email, err)
+			utils.BizLogger(c).Errorf("「%s」用户不存在: %v", acc.Email, err)
+			return fmt.Errorf("「%s」用户不存在: %w", acc.Email, err)
 		}
 
 		newPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
 		if err != nil {
-			utils.BizLogger(c).Errorf("密码加密失败: %v", err)
-			return fmt.Errorf("密码加密失败: %w", err)
+			utils.BizLogger(c).Errorf("「%s」用户密码加密失败: %v", acc.Email, err)
+			return fmt.Errorf("「%s」用户密码加密失败: %w", acc.Email, err)
 		}
 		acc.Password = string(newPassword)
 
 		if err := mapper.UpdateAccount(c, acc); err != nil {
-			utils.BizLogger(c).Errorf("密码修改失败: %v", err)
-			return fmt.Errorf("密码修改失败: %w", err)
+			utils.BizLogger(c).Errorf("「%s」用户密码修改失败: %v", acc.Email, err)
+			return fmt.Errorf("「%s」用户密码修改失败: %w", acc.Email, err)
 		}
 
 		return nil
 	})
+}
+
+// UpdateAccount 更新账户信息逻辑
+// 参数：
+//   - c: Echo 上下文
+//   - req: 更新账户请求
+//
+// 返回值：
+//   - *account.UpdateAccountVO: 更新后的账户视图对象
+//   - error: 操作过程中的错误
+func UpdateAccount(c echo.Context, req *dto.UpdateAccountRequest) (*account.UpdateAccountVO, error) {
+	var updateVO *account.UpdateAccountVO
+
+	err := utils.RunDBTransaction(c, func(tx error) error {
+		accountID, err := utils.ParseAccountFromJWT(c.Request().Header.Get("Authorization"))
+		if err != nil {
+			utils.BizLogger(c).Errorf("access_token 解析失败: %v", err)
+			return fmt.Errorf("access_token 解析失败: %w", err)
+		}
+
+		acc, err := mapper.GetAccountByAccountID(c, accountID)
+		if err != nil {
+			utils.BizLogger(c).Errorf("获取「%s」用户信息失败: %v", acc.Email, err)
+			return fmt.Errorf("获取「%s」用户信息失败: %w", acc.Email, err)
+		}
+
+		acc.Nickname = req.Nickname
+		acc.Phone = req.Phone
+		acc.Avatar = req.Avatar
+
+		if err := mapper.UpdateAccount(c, acc); err != nil {
+			utils.BizLogger(c).Errorf("更新「%s」用户信息失败: %v", acc.Email, err)
+			return fmt.Errorf("更新「%s」用户信息失败: %w", acc.Email, err)
+		}
+
+		vo, err := utils.MapModelToVO(acc, &account.UpdateAccountVO{})
+		if err != nil {
+			utils.BizLogger(c).Errorf("更新「%s」用户信息时映射 VO 失败: %v", acc.Email, err)
+			return fmt.Errorf("更新「%s」用户信息时映射 VO 失败: %w", acc.Email, err)
+		}
+
+		updateVO = vo.(*account.UpdateAccountVO)
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return updateVO, nil
 }

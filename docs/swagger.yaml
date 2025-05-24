@@ -3,6 +3,8 @@ definitions:
   account.GetAccountVO:
     description: 请求获取账户信息时所需参数
     properties:
+      avatar:
+        type: string
       email:
         type: string
       nickname:
@@ -16,6 +18,18 @@ definitions:
       access_token:
         type: string
       refresh_token:
+        type: string
+    type: object
+  account.UpdateAccountVO:
+    description: 更新账户信息后返回的参数
+    properties:
+      avatar:
+        type: string
+      email:
+        type: string
+      nickname:
+        type: string
+      phone:
         type: string
     type: object
   category.CategoriesVO:
@@ -222,6 +236,20 @@ definitions:
     - email
     - email_verification_code
     - new_password
+    type: object
+  dto.UpdateAccountRequest:
+    description: 用户更新账户信息所需参数
+    properties:
+      avatar:
+        type: string
+      nickname:
+        maxLength: 20
+        minLength: 1
+        type: string
+      phone:
+        type: string
+    required:
+    - nickname
     type: object
   dto.UpdateOneCategoryRequest:
     properties:
@@ -484,6 +512,47 @@ paths:
       security:
       - BearerAuth: []
       summary: 重置密码
+      tags:
+      - 账户
+  /account/updateAccount:
+    post:
+      consumes:
+      - application/json
+      description: 更新当前登录用户的账户信息
+      parameters:
+      - description: 更新账户信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateAccountRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/vo.Result'
+            - properties:
+                data:
+                  $ref: '#/definitions/account.UpdateAccountVO'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/vo.Result'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/vo.Result'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/vo.Result'
+      security:
+      - BearerAuth: []
+      summary: 更新账户信息
       tags:
       - 账户
   /category/createOneCategory:

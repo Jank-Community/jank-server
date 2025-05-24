@@ -24,12 +24,23 @@ import (
 //   - *comment.CommentsVO: 创建后的评论视图对象
 //   - error: 操作过程中的错误
 func CreateComment(c echo.Context, req *dto.CreateCommentRequest) (*comment.CommentsVO, error) {
-	var commentVO *comment.CommentsVO
+	accountID, err := utils.ParseAccountFromJWT(c.Request().Header.Get("Authorization"))
+	if err != nil {
+		utils.BizLogger(c).Errorf("access_token 解析失败: %v", err)
+		return nil, fmt.Errorf("access_token 解析失败: %w", err)
+	}
 
-	err := utils.RunDBTransaction(c, func(tx error) error {
+	acc, err := mapper.GetAccountByAccountID(c, accountID)
+	if err != nil {
+		utils.BizLogger(c).Errorf("「%s」用户不存在: %v", acc.Email, err)
+		return nil, fmt.Errorf("「%s」用户不存在: %w", acc.Email, err)
+	}
+
+	var commentVO *comment.CommentsVO
+	err = utils.RunDBTransaction(c, func(tx error) error {
 		com := &model.Comment{
 			Content:          req.Content,
-			UserId:           req.UserId,
+			AccountId:        accountID,
 			PostId:           req.PostId,
 			ReplyToCommentId: req.ReplyToCommentId,
 		}
@@ -65,13 +76,13 @@ func CreateComment(c echo.Context, req *dto.CreateCommentRequest) (*comment.Comm
 //   - *comment.CommentsVO: 评论及其回复的视图对象
 //   - error: 操作过程中的错误
 func GetCommentWithReplies(c echo.Context, req *dto.GetOneCommentRequest) (*comment.CommentsVO, error) {
-	com, err := mapper.GetCommentByID(c, req.CommentID)
+	com, err := mapper.GetCommentByID(c, req.ID)
 	if err != nil {
 		utils.BizLogger(c).Errorf("获取评论失败：%v", err)
 		return nil, fmt.Errorf("获取评论失败：%w", err)
 	}
 
-	replies, err := mapper.GetReplyByCommentID(c, req.CommentID)
+	replies, err := mapper.GetReplyByCommentID(c, req.ID)
 	if err != nil {
 		utils.BizLogger(c).Errorf("获取子评论失败：%v", err)
 		return nil, fmt.Errorf("获取子评论失败：%w", err)
@@ -129,7 +140,7 @@ func GetCommentGraphByPostID(c echo.Context, req *dto.GetCommentGraphRequest) ([
 		}
 	}
 
-	processed := make(map[int64]bool)
+	processed := make(map[string]bool)
 	var processComment func(*comment.CommentsVO) *comment.CommentsVO
 	processComment = func(vo *comment.CommentsVO) *comment.CommentsVO {
 		if processed[vo.ID] {

@@ -42,31 +42,31 @@ definitions:
       description:
         type: string
       id:
-        type: integer
+        type: string
       name:
         type: string
       parent_id:
-        type: integer
+        type: string
       path:
         type: string
     type: object
   comment.CommentsVO:
     description: 获取单个评论的响应
     properties:
+      account_id:
+        type: string
       content:
         type: string
       id:
-        type: integer
+        type: string
       post_id:
-        type: integer
+        type: string
       replies:
         items:
           $ref: '#/definitions/comment.CommentsVO'
         type: array
       reply_to_comment_id:
-        type: integer
-      user_id:
-        type: integer
+        type: string
     type: object
   dto.CreateCommentRequest:
     properties:
@@ -75,15 +75,14 @@ definitions:
         minLength: 1
         type: string
       post_id:
-        type: integer
+        example: "0"
+        type: string
       reply_to_comment_id:
-        type: integer
-      user_id:
-        type: integer
+        example: "0"
+        type: string
     required:
     - content
     - post_id
-    - user_id
     type: object
   dto.CreateOneCategoryRequest:
     properties:
@@ -93,14 +92,16 @@ definitions:
         minLength: 1
         type: string
       parent_id:
-        type: integer
+        example: "0"
+        type: string
     required:
     - name
     type: object
   dto.CreateOnePostRequest:
     properties:
       category_id:
-        type: integer
+        example: "0"
+        type: string
       content_markdown:
         type: string
       image:
@@ -132,7 +133,8 @@ definitions:
   dto.DeleteOnePostRequest:
     properties:
       id:
-        type: integer
+        example: "0"
+        type: string
     required:
     - id
     type: object
@@ -161,8 +163,10 @@ definitions:
   dto.GetOnePostRequest:
     properties:
       id:
-        default: 0
-        type: integer
+        example: "0"
+        type: string
+    required:
+    - id
     type: object
   dto.ListAllObjectsRequest:
     properties:
@@ -256,13 +260,15 @@ definitions:
       description:
         type: string
       id:
-        type: integer
+        example: "0"
+        type: string
       name:
         maxLength: 255
         minLength: 1
         type: string
       parent_id:
-        type: integer
+        example: "0"
+        type: string
     required:
     - id
     - name
@@ -270,11 +276,13 @@ definitions:
   dto.UpdateOnePostRequest:
     properties:
       category_id:
-        type: integer
+        example: "0"
+        type: string
       content_markdown:
         type: string
       id:
-        type: integer
+        example: "0"
+        type: string
       image:
         type: string
       title:
@@ -291,12 +299,12 @@ definitions:
     description: 获取帖子时返回的响应数据
     properties:
       category_id:
-        type: integer
+        type: string
       content_html:
         description: ContentMarkdown string `json:"content_markdown"`
         type: string
       id:
-        type: integer
+        type: string
       image:
         type: string
       title:

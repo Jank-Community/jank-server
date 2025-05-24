@@ -21,7 +21,7 @@ import (
 // @Tags         评论
 // @Accept       json
 // @Produce      json
-// @Param        id    query     int  true  "评论ID"
+// @Param        id    path     int  true  "评论ID"
 // @Success      200   {object}  vo.Result{data=comment.CommentsVO}  "获取成功"
 // @Failure      400   {object}  vo.Result  "请求参数错误"
 // @Failure      404   {object}  vo.Result  "评论不存在"

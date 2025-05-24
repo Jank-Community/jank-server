@@ -10,19 +10,19 @@ package dto
 type CreateOneCategoryRequest struct {
 	Name        string `json:"name" xml:"name" form:"name" query:"name" validate:"required,min=1"`
 	Description string `json:"description" xml:"description" form:"description" query:"description" default:""`
-	ParentID    int64  `json:"parent_id" xml:"parent_id" form:"parent_id" query:"parent_id" validate:"omitempty"`
+	ParentID    int64  `json:"parent_id,string" xml:"parent_id,string" form:"parent_id,string" query:"parent_id,string" validate:"omitempty"`
 }
 
 // DeleteOneCategoryRequest  删除类目请求
 // @Param id path int64 true "类目ID"
 type DeleteOneCategoryRequest struct {
-	ID int64 `json:"id" xml:"id" form:"id" query:"id" validate:"required"`
+	ID int64 `json:"id,string" xml:"id,string" form:"id,string" query:"id,string" validate:"required"`
 }
 
 // GetOneCategoryRequest 更新类目请求
-// @Param id path int true "类目ID"
+// @Param id path int64 true "类目ID"
 type GetOneCategoryRequest struct {
-	ID int64 `json:"id" xml:"id" form:"id" query:"id" validate:"required"`
+	ID int64 `json:"id,string" xml:"id,string" form:"id,string" query:"id,string" validate:"required"`
 }
 
 // UpdateOneCategoryRequest    更新类目请求
@@ -30,11 +30,9 @@ type GetOneCategoryRequest struct {
 // @Param name        body     string  true  "类目名称"
 // @Param description body     string  false "类目描述"
 // @Param parent_id   body     int64   false "父类目ID"
-// @Param path        body     string  false "类目路径"
-// @Param children    body     array   false "子类目"
 type UpdateOneCategoryRequest struct {
-	ID          int64  `json:"id" xml:"id" form:"id" query:"id" validate:"required"`
+	ID          int64  `json:"id,string" xml:"id,string" form:"id,string" query:"id,string" validate:"required"`
 	Name        string `json:"name" xml:"name" form:"name" query:"name" validate:"required,min=1,max=255"`
 	Description string `json:"description" xml:"description" form:"description" query:"description" default:""`
-	ParentID    int64  `json:"parent_id" xml:"parent_id" form:"parent_id" query:"parent_id" validate:"omitempty"`
+	ParentID    int64  `json:"parent_id,string" xml:"parent_id,string" form:"parent_id,string" query:"parent_id,string" validate:"omitempty"`
 }

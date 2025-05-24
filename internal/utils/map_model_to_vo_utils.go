@@ -82,6 +82,10 @@ func MapModelToVO(modelData interface{}, voPtr interface{}) (interface{}, error)
 						voField.Set(reflect.ValueOf(intArray))
 						mu.Unlock()
 					}
+				} else if strings.HasSuffix(strings.ToLower(fieldType.Name), "id") && modelField.Kind() == reflect.Int64 && voField.Kind() == reflect.String {
+					mu.Lock()
+					voField.SetString(strconv.FormatInt(modelField.Int(), 10))
+					mu.Unlock()
 				}
 			}
 
@@ -96,7 +100,11 @@ func MapModelToVO(modelData interface{}, voPtr interface{}) (interface{}, error)
 
 					if voField.IsValid() && voField.CanSet() {
 						mu.Lock()
-						voField.Set(modelField.Field(j))
+						if embeddedField.Type.AssignableTo(voField.Type()) {
+							voField.Set(modelField.Field(j))
+						} else if strings.HasSuffix(embeddedField.Name, "ID") && modelField.Field(j).Kind() == reflect.Int64 && voField.Kind() == reflect.String {
+							voField.SetString(strconv.FormatInt(modelField.Field(j).Int(), 10))
+						}
 						mu.Unlock()
 					}
 				}

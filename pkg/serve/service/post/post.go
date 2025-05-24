@@ -111,7 +111,7 @@ func CreateOnePost(c echo.Context, req *dto.CreateOnePostRequest) (*post.PostsVO
 		}
 
 		postsVO = vo.(*post.PostsVO)
-		postsVO.CategoryID = categoryID
+		postsVO.CategoryID = strconv.FormatInt(categoryID, 10)
 
 		return nil
 	})
@@ -156,7 +156,7 @@ func GetOnePostByID(c echo.Context, req *dto.GetOnePostRequest) (*post.PostsVO, 
 	}
 
 	if postCategory != nil {
-		postsVO.CategoryID = postCategory.CategoryID
+		postsVO.CategoryID = strconv.FormatInt(postCategory.CategoryID, 10)
 	}
 
 	return postsVO, nil
@@ -194,7 +194,7 @@ func GetAllPostsWithPagingAndFormat(c echo.Context, page, pageSize int) (map[str
 		}
 
 		if postCategory != nil {
-			postVO.CategoryID = postCategory.CategoryID
+			postVO.CategoryID = strconv.FormatInt(postCategory.CategoryID, 10)
 		}
 
 		// 只保留 ContentHTML 的前 200 个字符
@@ -324,7 +324,7 @@ func UpdateOnePost(c echo.Context, req *dto.UpdateOnePostRequest) (*post.PostsVO
 		}
 
 		postsVO = vo.(*post.PostsVO)
-		postsVO.CategoryID = categoryID
+		postsVO.CategoryID = strconv.FormatInt(categoryID, 10)
 
 		return nil
 	})

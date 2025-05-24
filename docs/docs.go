@@ -1875,13 +1875,13 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
                 "parent_id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "path": {
                     "type": "string"
@@ -1892,14 +1892,17 @@ const docTemplate = `{
             "description": "获取单个评论的响应",
             "type": "object",
             "properties": {
+                "account_id": {
+                    "type": "string"
+                },
                 "content": {
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "post_id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "replies": {
                     "type": "array",
@@ -1908,10 +1911,7 @@ const docTemplate = `{
                     }
                 },
                 "reply_to_comment_id": {
-                    "type": "integer"
-                },
-                "user_id": {
-                    "type": "integer"
+                    "type": "string"
                 }
             }
         },
@@ -1919,8 +1919,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "content",
-                "post_id",
-                "user_id"
+                "post_id"
             ],
             "properties": {
                 "content": {
@@ -1929,13 +1928,12 @@ const docTemplate = `{
                     "minLength": 1
                 },
                 "post_id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "reply_to_comment_id": {
-                    "type": "integer"
-                },
-                "user_id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },
@@ -1953,7 +1951,8 @@ const docTemplate = `{
                     "minLength": 1
                 },
                 "parent_id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },
@@ -1964,7 +1963,8 @@ const docTemplate = `{
             ],
             "properties": {
                 "category_id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "content_markdown": {
                     "type": "string"
@@ -2009,7 +2009,8 @@ const docTemplate = `{
             ],
             "properties": {
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },
@@ -2046,10 +2047,13 @@ const docTemplate = `{
         },
         "dto.GetOnePostRequest": {
             "type": "object",
+            "required": [
+                "id"
+            ],
             "properties": {
                 "id": {
-                    "type": "integer",
-                    "default": 0
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },
@@ -2184,7 +2188,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "name": {
                     "type": "string",
@@ -2192,7 +2197,8 @@ const docTemplate = `{
                     "minLength": 1
                 },
                 "parent_id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },
@@ -2203,13 +2209,15 @@ const docTemplate = `{
             ],
             "properties": {
                 "category_id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "content_markdown": {
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "image": {
                     "type": "string"
@@ -2230,14 +2238,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "category_id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "content_html": {
                     "description": "ContentMarkdown string ` + "`" + `json:\"content_markdown\"` + "`" + `",
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "image": {
                     "type": "string"

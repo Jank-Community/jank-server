@@ -8,7 +8,7 @@ package dto
 // @Param bucket_name  formData string true  "存储桶名称"
 type UploadOneFileRequest struct {
 	BucketName string `json:"bucket_name" xml:"bucket_name" form:"bucket_name" validate:"required,min=1,max=63"`
-	UploadFile string `json:"upload_file" xml:"upload_file" form:"upload_file" default:""`
+	UploadFile string `json:"upload_file" xml:"upload_file" form:"upload_file"`
 }
 
 // DownloadOneFileRequest 下载文件请求
@@ -28,9 +28,9 @@ type DeleteOneFileRequest struct {
 }
 
 // ListAllObjectsRequest 列出对象请求
-// @Param bucket_name body string true  "存储桶名称"
-// @Param prefix      body string false "对象名称前缀(可选，如果不指定则列出所有对象)"
+// @Param bucket_name query string true  "存储桶名称"
+// @Param prefix      query string false "对象名称前缀(可选，如果不指定则列出所有对象)"
 type ListAllObjectsRequest struct {
-	BucketName string `json:"bucket_name" xml:"bucket_name" form:"bucket_name" validate:"required,min=1,max=63"`
-	Prefix     string `json:"prefix" xml:"prefix" form:"prefix" validate:"omitempty,max=1024"`
+	BucketName string `json:"bucket_name" xml:"bucket_name" form:"bucket_name" query:"bucket_name" validate:"required,min=1,max=63"`
+	Prefix     string `json:"prefix" xml:"prefix" form:"prefix" query:"prefix" validate:"omitempty,max=1024"`
 }

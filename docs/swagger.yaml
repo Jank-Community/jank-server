@@ -111,7 +111,6 @@ definitions:
         minLength: 1
         type: string
       visibility:
-        default: false
         type: boolean
     required:
     - title
@@ -138,28 +137,6 @@ definitions:
     required:
     - id
     type: object
-  dto.DownloadOneFileRequest:
-    properties:
-      bucket_name:
-        maxLength: 63
-        minLength: 1
-        type: string
-      object_name:
-        maxLength: 1024
-        minLength: 1
-        type: string
-    required:
-    - bucket_name
-    - object_name
-    type: object
-  dto.GetAccountRequest:
-    description: 请求获取账户信息时所需参数
-    properties:
-      email:
-        type: string
-    required:
-    - email
-    type: object
   dto.GetOnePostRequest:
     properties:
       id:
@@ -167,18 +144,6 @@ definitions:
         type: string
     required:
     - id
-    type: object
-  dto.ListAllObjectsRequest:
-    properties:
-      bucket_name:
-        maxLength: 63
-        minLength: 1
-        type: string
-      prefix:
-        maxLength: 1024
-        type: string
-    required:
-    - bucket_name
     type: object
   dto.LoginRequest:
     description: 用户登录请求所需参数
@@ -290,7 +255,6 @@ definitions:
         minLength: 0
         type: string
       visibility:
-        default: false
         type: boolean
     required:
     - id
@@ -302,6 +266,10 @@ definitions:
         type: string
       content_html:
         description: ContentMarkdown string `json:"content_markdown"`
+        type: string
+      gmt_create:
+        type: string
+      gmt_modified:
         type: string
       id:
         type: string
@@ -334,17 +302,15 @@ info:
   version: "1.0"
 paths:
   /account/getAccount:
-    post:
+    get:
       consumes:
       - application/json
       description: 根据提供的邮箱获取对应用户的详细信息
       parameters:
-      - description: 获取账户请求参数
-        in: body
-        name: request
+      - in: query
+        name: email
         required: true
-        schema:
-          $ref: '#/definitions/dto.GetAccountRequest'
+        type: string
       produces:
       - application/json
       responses:
@@ -606,7 +572,7 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -643,10 +609,10 @@ paths:
       description: 根据类目 ID 获取子类目树
       parameters:
       - description: 类目ID
-        in: path
+        in: query
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -709,10 +675,10 @@ paths:
       description: 根据类目 ID 获取单个类目的详细信息
       parameters:
       - description: 类目ID
-        in: path
+        in: query
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -746,7 +712,7 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       - description: 更新类目请求参数
         in: body
         name: request
@@ -820,10 +786,11 @@ paths:
       description: 通过评论 ID 进行软删除
       parameters:
       - description: 评论ID
-        in: path
+        in: body
         name: id
         required: true
-        type: integer
+        schema:
+          type: string
       produces:
       - application/json
       responses:
@@ -857,7 +824,7 @@ paths:
         in: query
         name: post_id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -921,17 +888,23 @@ paths:
       tags:
       - 对象存储
   /oss/downloadFile:
-    post:
+    get:
       consumes:
       - application/json
       description: 从 MinIO 对象存储下载文件
       parameters:
-      - description: 下载文件请求参数
-        in: body
-        name: request
+      - in: query
+        maxLength: 63
+        minLength: 1
+        name: bucket_name
         required: true
-        schema:
-          $ref: '#/definitions/dto.DownloadOneFileRequest'
+        type: string
+      - in: query
+        maxLength: 1024
+        minLength: 1
+        name: object_name
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -962,17 +935,21 @@ paths:
       tags:
       - 对象存储
   /oss/listObjects:
-    post:
+    get:
       consumes:
       - application/json
       description: 列出 MinIO 对象存储中的文件
       parameters:
-      - description: 列出对象请求参数
-        in: body
-        name: request
+      - in: query
+        maxLength: 63
+        minLength: 1
+        name: bucket_name
         required: true
-        schema:
-          $ref: '#/definitions/dto.ListAllObjectsRequest'
+        type: string
+      - in: query
+        maxLength: 1024
+        name: prefix
+        type: string
       produces:
       - application/json
       responses:
@@ -1120,15 +1097,13 @@ paths:
       - application/json
       description: 获取所有的文章列表，按创建时间倒序排序
       parameters:
-      - description: 页码
+      - description: 页码(默认为1)
         in: query
         name: page
-        required: true
         type: integer
-      - description: 每页条数
+      - description: 每页条数(默认为5,最大100)
         in: query
         name: page_size
-        required: true
         type: integer
       produces:
       - application/json
@@ -1144,6 +1119,10 @@ paths:
                     $ref: '#/definitions/post.PostsVO'
                   type: array
               type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/vo.Result'
         "500":
           description: 服务器错误
           schema:

@@ -21,18 +21,18 @@ import (
 // @Tags         评论
 // @Accept       json
 // @Produce      json
-// @Param        id    path     int  true  "评论ID"
+// @Param        id    query     string  true  "评论ID"
 // @Success      200   {object}  vo.Result{data=comment.CommentsVO}  "获取成功"
 // @Failure      400   {object}  vo.Result  "请求参数错误"
 // @Failure      404   {object}  vo.Result  "评论不存在"
 // @Router       /comment/getOneComment [get]
 func GetOneComment(c echo.Context) error {
 	req := new(dto.GetOneCommentRequest)
-	if err := c.Bind(req); err != nil {
+	if err := (&echo.DefaultBinder{}).BindQueryParams(c, req); err != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
-	errors := utils.Validator(*req)
+	errors := utils.Validator(req)
 	if errors != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST)))
 	}
@@ -51,17 +51,17 @@ func GetOneComment(c echo.Context) error {
 // @Tags         评论
 // @Accept       json
 // @Produce      json
-// @Param        post_id    query     int  true  "文章ID"
+// @Param        post_id    query     string  true  "文章ID"
 // @Success      200        {object} vo.Result{data=[]comment.CommentsVO}  "获取成功"
 // @Failure      500        {object} vo.Result  "服务器错误"
 // @Router       /comment/getOneComment [get]
 func GetCommentGraph(c echo.Context) error {
 	req := new(dto.GetCommentGraphRequest)
-	if err := c.Bind(req); err != nil {
+	if err := (&echo.DefaultBinder{}).BindQueryParams(c, req); err != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
-	errors := utils.Validator(*req)
+	errors := utils.Validator(req)
 	if errors != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST)))
 	}
@@ -90,7 +90,7 @@ func CreateOneComment(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
-	errors := utils.Validator(*req)
+	errors := utils.Validator(req)
 	if errors != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST)))
 	}
@@ -109,7 +109,7 @@ func CreateOneComment(c echo.Context) error {
 // @Tags         评论
 // @Accept       json
 // @Produce      json
-// @Param        id    path     int  true  "评论ID"
+// @Param        id    body     string  true  "评论ID"
 // @Success      200   {object} vo.Result{data=comment.CommentsVO}  "软删除成功"
 // @Failure      400   {object} vo.Result  "请求参数错误"
 // @Failure      404   {object} vo.Result  "评论不存在"
@@ -120,7 +120,7 @@ func DeleteOneComment(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
-	errors := utils.Validator(*req)
+	errors := utils.Validator(req)
 	if errors != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST)))
 	}

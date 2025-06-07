@@ -16,7 +16,7 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/account/getAccount": {
-            "post": {
+            "get": {
                 "description": "根据提供的邮箱获取对应用户的详细信息",
                 "consumes": [
                     "application/json"
@@ -30,13 +30,10 @@ const docTemplate = `{
                 "summary": "获取账户信息",
                 "parameters": [
                     {
-                        "description": "获取账户请求参数",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.GetAccountRequest"
-                        }
+                        "type": "string",
+                        "name": "email",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -474,7 +471,7 @@ const docTemplate = `{
                 "summary": "删除类目",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "类目ID",
                         "name": "id",
                         "in": "path",
@@ -536,10 +533,10 @@ const docTemplate = `{
                 "summary": "获取子类目树",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "类目ID",
                         "name": "id",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -645,10 +642,10 @@ const docTemplate = `{
                 "summary": "获取单个类目详情",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "类目ID",
                         "name": "id",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -706,7 +703,7 @@ const docTemplate = `{
                 "summary": "更新类目",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "类目ID",
                         "name": "id",
                         "in": "path",
@@ -829,11 +826,13 @@ const docTemplate = `{
                 "summary": "软删除评论",
                 "parameters": [
                     {
-                        "type": "integer",
                         "description": "评论ID",
                         "name": "id",
-                        "in": "path",
-                        "required": true
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {
@@ -885,7 +884,7 @@ const docTemplate = `{
                 "summary": "获取评论图",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "文章ID",
                         "name": "post_id",
                         "in": "query",
@@ -993,7 +992,7 @@ const docTemplate = `{
             }
         },
         "/oss/downloadFile": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "BearerAuth": []
@@ -1012,13 +1011,20 @@ const docTemplate = `{
                 "summary": "下载文件",
                 "parameters": [
                     {
-                        "description": "下载文件请求参数",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.DownloadOneFileRequest"
-                        }
+                        "maxLength": 63,
+                        "minLength": 1,
+                        "type": "string",
+                        "name": "bucket_name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "maxLength": 1024,
+                        "minLength": 1,
+                        "type": "string",
+                        "name": "object_name",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1062,7 +1068,7 @@ const docTemplate = `{
             }
         },
         "/oss/listObjects": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "BearerAuth": []
@@ -1081,13 +1087,18 @@ const docTemplate = `{
                 "summary": "列出对象",
                 "parameters": [
                     {
-                        "description": "列出对象请求参数",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.ListAllObjectsRequest"
-                        }
+                        "maxLength": 63,
+                        "minLength": 1,
+                        "type": "string",
+                        "name": "bucket_name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "maxLength": 1024,
+                        "type": "string",
+                        "name": "prefix",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1331,17 +1342,15 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "页码",
+                        "description": "页码(默认为1)",
                         "name": "page",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "每页条数",
+                        "description": "每页条数(默认为5,最大100)",
                         "name": "page_size",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1364,6 +1373,12 @@ const docTemplate = `{
                                     }
                                 }
                             ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
                         }
                     },
                     "500": {
@@ -1978,8 +1993,7 @@ const docTemplate = `{
                     "minLength": 1
                 },
                 "visibility": {
-                    "type": "boolean",
-                    "default": false
+                    "type": "boolean"
                 }
             }
         },
@@ -2014,37 +2028,6 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.DownloadOneFileRequest": {
-            "type": "object",
-            "required": [
-                "bucket_name",
-                "object_name"
-            ],
-            "properties": {
-                "bucket_name": {
-                    "type": "string",
-                    "maxLength": 63,
-                    "minLength": 1
-                },
-                "object_name": {
-                    "type": "string",
-                    "maxLength": 1024,
-                    "minLength": 1
-                }
-            }
-        },
-        "dto.GetAccountRequest": {
-            "description": "请求获取账户信息时所需参数",
-            "type": "object",
-            "required": [
-                "email"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                }
-            }
-        },
         "dto.GetOnePostRequest": {
             "type": "object",
             "required": [
@@ -2054,23 +2037,6 @@ const docTemplate = `{
                 "id": {
                     "type": "string",
                     "example": "0"
-                }
-            }
-        },
-        "dto.ListAllObjectsRequest": {
-            "type": "object",
-            "required": [
-                "bucket_name"
-            ],
-            "properties": {
-                "bucket_name": {
-                    "type": "string",
-                    "maxLength": 63,
-                    "minLength": 1
-                },
-                "prefix": {
-                    "type": "string",
-                    "maxLength": 1024
                 }
             }
         },
@@ -2228,8 +2194,7 @@ const docTemplate = `{
                     "minLength": 0
                 },
                 "visibility": {
-                    "type": "boolean",
-                    "default": false
+                    "type": "boolean"
                 }
             }
         },
@@ -2242,6 +2207,12 @@ const docTemplate = `{
                 },
                 "content_html": {
                     "description": "ContentMarkdown string ` + "`" + `json:\"content_markdown\"` + "`" + `",
+                    "type": "string"
+                },
+                "gmt_create": {
+                    "type": "string"
+                },
+                "gmt_modified": {
                     "type": "string"
                 },
                 "id": {

@@ -5,7 +5,6 @@ package post
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 
@@ -30,11 +29,11 @@ import (
 // @Router       /post/getOnePost [get]
 func GetOnePost(c echo.Context) error {
 	req := new(dto.GetOnePostRequest)
-	if err := c.Bind(req); err != nil {
+	if err := (&echo.DefaultBinder{}).BindQueryParams(c, req); err != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
-	errors := utils.Validator(*req)
+	errors := utils.Validator(req)
 	if errors != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST)))
 	}
@@ -53,23 +52,24 @@ func GetOnePost(c echo.Context) error {
 // @Tags         文章
 // @Accept       json
 // @Produce      json
-// @Param        page        query     int     true   "页码"
-// @Param        page_size   query     int     true   "每页条数"
+// @Param        page      query     int  false  "页码(默认为1)"
+// @Param        page_size query     int  false  "每页条数(默认为5,最大100)"
 // @Success      200  {object}  vo.Result{data=[]post.PostsVO}  "获取成功"
+// @Failure      400  {object}  vo.Result                 "请求参数错误"
 // @Failure      500  {object}  vo.Result                 "服务器错误"
 // @Router       /post/getAllPosts [get]
 func GetAllPosts(c echo.Context) error {
-	page, err := strconv.Atoi(c.QueryParam("page"))
-	if err != nil || page < 1 {
-		page = 1
+	req := new(dto.GetAllPostsRequest)
+	if err := (&echo.DefaultBinder{}).BindQueryParams(c, req); err != nil {
+		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
-	pageSize, err := strconv.Atoi(c.QueryParam("page_size"))
-	if err != nil || pageSize < 1 {
-		pageSize = 5
+	errors := utils.Validator(req)
+	if errors != nil {
+		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST)))
 	}
 
-	posts, err := service.GetAllPostsWithPagingAndFormat(c, page, pageSize)
+	posts, err := service.GetAllPostsWithPagingAndFormat(c, req.Page, req.PageSize)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, vo.Fail(c, err, bizErr.New(bizErr.SERVER_ERR, err.Error())))
 	}
@@ -95,7 +95,7 @@ func CreateOnePost(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
-	errors := utils.Validator(*req)
+	errors := utils.Validator(req)
 	if errors != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST)))
 	}
@@ -127,7 +127,7 @@ func UpdateOnePost(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
-	errors := utils.Validator(*req)
+	errors := utils.Validator(req)
 	if errors != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST)))
 	}
@@ -155,11 +155,11 @@ func UpdateOnePost(c echo.Context) error {
 // @Router       /post/deleteOnePost [post]
 func DeleteOnePost(c echo.Context) error {
 	req := new(dto.DeleteOnePostRequest)
-	if err := c.Bind(&req); err != nil {
+	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
-	errors := utils.Validator(*req)
+	errors := utils.Validator(req)
 	if errors != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST)))
 	}

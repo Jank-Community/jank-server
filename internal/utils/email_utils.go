@@ -7,7 +7,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"math/rand"
-	"regexp"
 	"time"
 
 	"gopkg.in/gomail.v2"
@@ -33,6 +32,13 @@ var emailServers = map[string]struct {
 }
 
 // SendEmail 发送邮件到指定邮箱
+// 参数：
+//   - content: 邮件内容
+//   - toEmails: 目标邮箱
+//
+// 返回值：
+//   - bool: 发送成功返回 true，失败返回 false
+//   - error: 执行过程中的错误
 func SendEmail(content string, toEmails []string) (bool, error) {
 	config, err := configs.LoadConfig()
 	if err != nil {
@@ -78,13 +84,9 @@ func SendEmail(content string, toEmails []string) (bool, error) {
 }
 
 // NewRand 生成六位数随机验证码
+// 返回值：
+//   - int: 六位数随机数
 func NewRand() int {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	return r.Intn(900000) + 100000
-}
-
-// ValidEmail 检查邮箱格式是否有效
-func ValidEmail(email string) bool {
-	pattern := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
-	return regexp.MustCompile(pattern).MatchString(email)
 }

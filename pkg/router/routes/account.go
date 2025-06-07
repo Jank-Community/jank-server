@@ -17,9 +17,9 @@ func RegisterAccountRoutes(r ...*echo.Group) {
 	// api v1 group
 	apiV1 := r[0]
 	accountGroupV1 := apiV1.Group("/account")
-	accountGroupV1.POST("/getAccount", account.GetAccount, auth_middleware.AuthMiddleware())
 	accountGroupV1.POST("/registerAccount", account.RegisterAcc)
 	accountGroupV1.POST("/loginAccount", account.LoginAccount)
+	accountGroupV1.GET("/getAccount", account.GetAccount, auth_middleware.AuthMiddleware())
 	accountGroupV1.POST("/updateAccount", account.UpdateAccount, auth_middleware.AuthMiddleware())
 	accountGroupV1.POST("/logoutAccount", account.LogoutAccount, auth_middleware.AuthMiddleware())
 	accountGroupV1.POST("/resetPassword", account.ResetPassword, auth_middleware.AuthMiddleware())

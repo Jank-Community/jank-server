@@ -14,6 +14,7 @@ import (
 	bizErr "jank.com/jank_blog/internal/error"
 	"jank.com/jank_blog/internal/global"
 	"jank.com/jank_blog/internal/utils"
+	"jank.com/jank_blog/pkg/serve/controller/verification/dto"
 	"jank.com/jank_blog/pkg/vo/verification"
 )
 
@@ -30,8 +31,8 @@ const (
 // 返回值：
 //   - *verification.ImgVerificationVO: 图形验证码VO
 //   - error: 操作过程中的错误
-func GenerateImgVerificationCode(c echo.Context, email string) (*verification.ImgVerificationVO, error) {
-	key := utils.IMG_VERIFICATION_CODE_CACHE_PREFIX + email
+func GenerateImgVerificationCode(c echo.Context, req *dto.GetOneVerificationCode) (*verification.ImgVerificationVO, error) {
+	key := utils.IMG_VERIFICATION_CODE_CACHE_PREFIX + req.Email
 
 	// 生成单个图形验证码
 	imgBase64, answer, err := utils.GenImgVerificationCode()
@@ -56,8 +57,8 @@ func GenerateImgVerificationCode(c echo.Context, email string) (*verification.Im
 //
 // 返回值：
 //   - error: 操作过程中的错误
-func SendEmailVerificationCode(c echo.Context, email string) error {
-	key := utils.EMAIL_VERIFICATION_CODE_CACHE_KEY_PREFIX + email
+func SendEmailVerificationCode(c echo.Context, req *dto.GetOneVerificationCode) error {
+	key := utils.EMAIL_VERIFICATION_CODE_CACHE_KEY_PREFIX + req.Email
 
 	// 检查验证码是否存在
 	exists, err := global.RedisClient.Exists(context.Background(), key).Result()
@@ -80,9 +81,9 @@ func SendEmailVerificationCode(c echo.Context, email string) error {
 	// 发送验证码邮件
 	expirationInMinutes := int(EMAIL_VERIFICATION_CODE_CACHE_EXPIRATION.Round(time.Minute).Minutes())
 	emailContent := fmt.Sprintf("您的注册验证码是: %d , 有效期为 %d 分钟。", code, expirationInMinutes)
-	success, err := utils.SendEmail(emailContent, []string{email})
+	success, err := utils.SendEmail(emailContent, []string{req.Email})
 	if !success {
-		utils.BizLogger(c).Errorf("邮箱验证码发送失败，邮箱地址: %s, 错误: %v", email, err)
+		utils.BizLogger(c).Errorf("邮箱验证码发送失败，邮箱地址: %s, 错误: %v", req.Email, err)
 		global.RedisClient.Del(context.Background(), key)
 		return bizErr.New(bizErr.SEND_EMAIL_VERIFICATION_CODE_FAIL, err.Error())
 	}

@@ -818,11 +818,21 @@
 				{
 					"name": "deleteOneComment",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50X2lkIjoxOTI2MjkxNjIzNTA3OTIyOTQ0LCJleHAiOjE3NDgyNzU4NDd9.FZkvZ2v0iDdfp97cOhbUM91kYsWQIXs7YuM2RzMV13U",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"id\": 1\n}\n",
+							"raw": "{\n  \"id\": \"1927012450658422784\"\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -888,22 +898,25 @@
 				},
 				{
 					"name": "getAccount",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
 					"request": {
 						"auth": {
 							"type": "bearer",
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZpcnN0OTI3MTcxNTk4QDE2My5jb20iLCJleHAiOjE3MzExMjk0MzksInVzZXJJRCI6OH0.wp5HN-JMfbJkWwFpajfVjjK_Z08k4_5Etzy5F0D8aFw",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50X2lkIjoxOTI2MjkxNjIzNTA3OTIyOTQ0LCJleHAiOjE3NDgxMDU5Mzd9.z4XkG2PoSRTYgOFwCEySeKVaX9xskA3DzKyspqYbQjo",
 									"type": "string"
 								}
 							]
 						},
-						"method": "POST",
+						"method": "GET",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"email\": \"927171598@qq.com\"\r\n}",
+							"raw": "",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -911,7 +924,7 @@
 							}
 						},
 						"url": {
-							"raw": "127.0.0.1:9010/api/v1/account/getAccount",
+							"raw": "127.0.0.1:9010/api/v1/account/getAccount?email=927171598@qq.com",
 							"host": [
 								"127",
 								"0",
@@ -924,6 +937,12 @@
 								"v1",
 								"account",
 								"getAccount"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "927171598@qq.com"
+								}
 							]
 						}
 					},
@@ -967,6 +986,49 @@
 								"v1",
 								"account",
 								"loginAccount"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateAccount",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50X2lkIjoxOTI2MjkxNjIzNTA3OTIyOTQ0LCJleHAiOjE3NDgxMDU5Mzd9.z4XkG2PoSRTYgOFwCEySeKVaX9xskA3DzKyspqYbQjo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nickname\": \"新昵称\",\r\n    \"phone\": \"13800138000\",\r\n    \"avatar\": \"https://example.com/avatar.jpg\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "127.0.0.1:9010/api/v1/account/updateAccount",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "9010",
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"updateAccount"
 							]
 						}
 					},
@@ -1053,6 +1115,175 @@
 								"v1",
 								"account",
 								"resetPassword"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "oss",
+			"item": [
+				{
+					"name": "uploadOneFile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "upload_file",
+									"type": "file",
+									"src": "/Users/fender/Documents/JankInfo/开发者文档.md"
+								},
+								{
+									"key": "bucket_name",
+									"value": "jank",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "127.0.0.1:9010/api/v1/oss/uploadOneFile",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "9010",
+							"path": [
+								"api",
+								"v1",
+								"oss",
+								"uploadOneFile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "downloadOneFile",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"bucket_name\": \"jank\",\n    \"object_name\": \"开发者文档_1924839933462188032.md\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "127.0.0.1:9010/api/v1/oss/downloadOneFile?bucket_name=jank&object_name=开发者文档_1924839933462188032.md",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "9010",
+							"path": [
+								"api",
+								"v1",
+								"oss",
+								"downloadOneFile"
+							],
+							"query": [
+								{
+									"key": "bucket_name",
+									"value": "jank"
+								},
+								{
+									"key": "object_name",
+									"value": "开发者文档_1924839933462188032.md"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteOneFile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"bucket_name\": \"jank\",\n    \"object_name\": \"English_1747747406813243000.docx\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "127.0.0.1:9010/api/v1/oss/deleteOneFile",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "9010",
+							"path": [
+								"api",
+								"v1",
+								"oss",
+								"deleteOneFile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "listAllObjects",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "127.0.0.1:9010/api/v1/oss/listAllObjects?bucket_name=jank&prefix",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "9010",
+							"path": [
+								"api",
+								"v1",
+								"oss",
+								"listAllObjects"
+							],
+							"query": [
+								{
+									"key": "bucket_name",
+									"value": "jank"
+								},
+								{
+									"key": "prefix",
+									"value": null
+								}
 							]
 						}
 					},

@@ -10,6 +10,7 @@ import (
 
 	bizErr "jank.com/jank_blog/internal/error"
 	"jank.com/jank_blog/internal/utils"
+	"jank.com/jank_blog/pkg/serve/controller/verification/dto"
 	service "jank.com/jank_blog/pkg/serve/service/verification"
 	"jank.com/jank_blog/pkg/vo"
 )
@@ -26,13 +27,17 @@ import (
 // @Failure      500   {object} vo.Result{data=string} "服务器错误，生成验证码失败"
 // @Router       /verification/sendImgVerificationCode [get]
 func SendImgVerificationCode(c echo.Context) error {
-	email := c.QueryParam("email")
-	if email == "" {
-		utils.BizLogger(c).Errorf("请求参数错误，邮箱地址为空")
-		return c.JSON(http.StatusBadRequest, vo.Fail(c, "请求参数错误，邮箱地址为空", bizErr.New(bizErr.BAD_REQUEST)))
+	req := new(dto.GetOneVerificationCode)
+	if err := (&echo.DefaultBinder{}).BindQueryParams(c, req); err != nil {
+		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
-	result, err := service.GenerateImgVerificationCode(c, email)
+	errors := utils.Validator(req)
+	if errors != nil {
+		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST, "请求参数校验失败")))
+	}
+
+	result, err := service.GenerateImgVerificationCode(c, req)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, vo.Fail(c, err, bizErr.New(bizErr.SERVER_ERR)))
 	}
@@ -52,18 +57,17 @@ func SendImgVerificationCode(c echo.Context) error {
 // @Failure 500 {object} vo.Result "服务器错误，邮箱验证码发送失败"
 // @Router /verification/sendEmailVerificationCode [get]
 func SendEmailVerificationCode(c echo.Context) error {
-	email := c.QueryParam("email")
-	if email == "" {
-		utils.BizLogger(c).Errorf("请求参数错误，邮箱地址为空")
-		return c.JSON(http.StatusBadRequest, vo.Fail(c, "请求参数错误，邮箱地址为空", bizErr.New(bizErr.BAD_REQUEST)))
+	req := new(dto.GetOneVerificationCode)
+	if err := (&echo.DefaultBinder{}).BindQueryParams(c, req); err != nil {
+		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
-	if !utils.ValidEmail(email) {
-		utils.BizLogger(c).Errorf("邮箱格式无效: %s", email)
-		return c.JSON(http.StatusBadRequest, vo.Fail(c, "邮箱格式无效", bizErr.New(bizErr.BAD_REQUEST)))
+	errors := utils.Validator(req)
+	if errors != nil {
+		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST, "请求参数校验失败")))
 	}
 
-	err := service.SendEmailVerificationCode(c, email)
+	err := service.SendEmailVerificationCode(c, req)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, vo.Fail(c, err, bizErr.New(bizErr.SERVER_ERR)))
 	}

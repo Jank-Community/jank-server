@@ -45,8 +45,8 @@ type GetAccountRequest struct {
 // @Param			avatar		body	string	true	"用户头像"
 type UpdateAccountRequest struct {
 	Nickname string `json:"nickname" xml:"nickname" form:"nickname" query:"nickname" validate:"required,min=1,max=20"`
-	Phone    string `json:"phone" xml:"phone" form:"phone" query:"phone" default:""`
-	Avatar   string `json:"avatar" xml:"avatar" form:"avatar" query:"avatar" default:""`
+	Phone    string `json:"phone" xml:"phone" form:"phone" query:"phone"`
+	Avatar   string `json:"avatar" xml:"avatar" form:"avatar" query:"avatar"`
 }
 
 // ResetPwdRequest  重置密码请求体

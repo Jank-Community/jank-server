@@ -9,24 +9,24 @@ package dto
 // @Param reply_to_comment_id body int64 false "回复的评论ID"
 type CreateCommentRequest struct {
 	Content          string `json:"content" xml:"content" form:"content" query:"content" validate:"required,min=1,max=1024"`
-	PostId           int64  `json:"post_id,string" xml:"post_id,string" form:"post_id,string" query:"post_id,string" validate:"required"`
-	ReplyToCommentId int64  `json:"reply_to_comment_id,string" xml:"reply_to_comment_id,string" form:"reply_to_comment_id,string" query:"reply_to_comment_id,string" validate:"omitempty"`
+	PostId           int64  `json:"post_id,string" xml:"post_id,string" form:"post_id,string" query:"post_id" validate:"required"`
+	ReplyToCommentId int64  `json:"reply_to_comment_id,string" xml:"reply_to_comment_id,string" form:"reply_to_comment_id,string" query:"reply_to_comment_id" validate:"omitempty"`
 }
 
 // DeleteCommentRequest 删除评论请求
 // @Param id path int64 true "评论ID"
 type DeleteCommentRequest struct {
-	ID int64 `json:"id,string" xml:"id,string" form:"id,string" query:"id,string" validate:"required"`
+	ID int64 `json:"id,string" xml:"id,string" form:"id,string" query:"id" validate:"required"`
 }
 
 // GetCommentGraphRequest 获取评论请求
 // @Param post_id path int64 true "帖子ID"
 type GetCommentGraphRequest struct {
-	PostID int64 `json:"post_id,string" xml:"post_id,string" form:"post_id,string" query:"post_id,string" validate:"required"`
+	PostID int64 `json:"post_id,string" xml:"post_id,string" form:"post_id,string" query:"post_id" validate:"required"`
 }
 
 // GetOneCommentRequest 获取评论请求
 // @Param id path int64 true "评论ID"
 type GetOneCommentRequest struct {
-	ID int64 `json:"id,string" xml:"id,string" form:"id,string" query:"id,string" validate:"required"`
+	ID int64 `json:"id,string" xml:"id,string" form:"id,string" query:"id" validate:"required"`
 }

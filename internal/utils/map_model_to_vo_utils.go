@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 // MapModelToVO 将模型数据映射到对应的 VO，返回具体类型的指针
@@ -104,6 +105,14 @@ func MapModelToVO(modelData interface{}, voPtr interface{}) (interface{}, error)
 							voField.Set(modelField.Field(j))
 						} else if strings.HasSuffix(embeddedField.Name, "ID") && modelField.Field(j).Kind() == reflect.Int64 && voField.Kind() == reflect.String {
 							voField.SetString(strconv.FormatInt(modelField.Field(j).Int(), 10))
+						} else if (embeddedField.Name == "GmtCreate" || embeddedField.Name == "GmtModified") && modelField.Field(j).Kind() == reflect.Int64 && voField.Kind() == reflect.String {
+							timestamp := modelField.Field(j).Int()
+							if timestamp > 0 {
+								timeStr := time.Unix(timestamp, 0).Format("2006-01-02 15:04:05")
+								voField.SetString(timeStr)
+							} else {
+								voField.SetString("")
+							}
 						}
 						mu.Unlock()
 					}

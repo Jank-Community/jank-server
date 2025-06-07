@@ -20,5 +20,5 @@ func RegisterOssRoutes(r ...*echo.Group) {
 	ossGroupV1.POST("/uploadOneFile", oss.UploadOneFile, auth_middleware.AuthMiddleware())
 	ossGroupV1.GET("/downloadOneFile", oss.DownloadOneFile, auth_middleware.AuthMiddleware())
 	ossGroupV1.POST("/deleteOneFile", oss.DeleteOneFile, auth_middleware.AuthMiddleware())
-	ossGroupV1.POST("/listAllObjects", oss.ListAllObjects, auth_middleware.AuthMiddleware())
+	ossGroupV1.GET("/listAllObjects", oss.ListAllObjects, auth_middleware.AuthMiddleware())
 }

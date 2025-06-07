@@ -106,11 +106,11 @@ func LoginAccount(c echo.Context) error {
 // @Tags         账户
 // @Accept       json
 // @Produce      json
-// @Param        request  body      dto.GetAccountRequest  true  "获取账户请求参数"
+// @Param        request  query      dto.GetAccountRequest  true  "获取账户请求参数"
 // @Success      200     {object}   vo.Result{data=account.GetAccountVO}  "获取成功"
 // @Failure      400     {object}   vo.Result              "请求参数错误"
 // @Failure      404     {object}   vo.Result              "用户不存在"
-// @Router       /account/getAccount [post]
+// @Router       /account/getAccount [get]
 // 参数：
 //   - c: Echo 上下文
 //
@@ -118,11 +118,11 @@ func LoginAccount(c echo.Context) error {
 //   - error: 操作过程中的错误
 func GetAccount(c echo.Context) error {
 	req := new(dto.GetAccountRequest)
-	if err := c.Bind(req); err != nil {
+	if err := (&echo.DefaultBinder{}).BindQueryParams(c, req); err != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
-	errors := utils.Validator(*req)
+	errors := utils.Validator(req)
 	if errors != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST, "请求参数校验失败")))
 	}
@@ -159,7 +159,7 @@ func UpdateAccount(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
-	errors := utils.Validator(*req)
+	errors := utils.Validator(req)
 	if errors != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST, "请求参数校验失败")))
 	}
@@ -219,7 +219,7 @@ func ResetPassword(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
-	errors := utils.Validator(*req)
+	errors := utils.Validator(req)
 	if errors != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST, "请求参数校验失败")))
 	}

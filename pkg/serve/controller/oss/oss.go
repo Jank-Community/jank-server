@@ -34,7 +34,7 @@ func UploadOneFile(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
-	errors := utils.Validator(*req)
+	errors := utils.Validator(req)
 	if errors != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST)))
 	}
@@ -53,20 +53,20 @@ func UploadOneFile(c echo.Context) error {
 // @Tags         对象存储
 // @Accept       json
 // @Produce      json
-// @Param        request  body      dto.DownloadOneFileRequest  true  "下载文件请求参数"
+// @Param        request  query      dto.DownloadOneFileRequest  true  "下载文件请求参数"
 // @Success      200     {object}   vo.Result{data=string}  "下载成功"
 // @Failure      400     {object}   vo.Result              "请求参数错误"
 // @Failure      404     {object}   vo.Result              "文件不存在"
 // @Failure      500     {object}   vo.Result              "服务器错误"
 // @Security     BearerAuth
-// @Router       /oss/downloadFile [post]
+// @Router       /oss/downloadFile [get]
 func DownloadOneFile(c echo.Context) error {
 	req := new(dto.DownloadOneFileRequest)
-	if err := c.Bind(req); err != nil {
+	if err := (&echo.DefaultBinder{}).BindQueryParams(c, req); err != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
-	errors := utils.Validator(*req)
+	errors := utils.Validator(req)
 	if errors != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST)))
 	}
@@ -98,7 +98,7 @@ func DeleteOneFile(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
-	errors := utils.Validator(*req)
+	errors := utils.Validator(req)
 	if errors != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST)))
 	}
@@ -116,19 +116,19 @@ func DeleteOneFile(c echo.Context) error {
 // @Tags         对象存储
 // @Accept       json
 // @Produce      json
-// @Param        request  body      dto.ListAllObjectsRequest  true  "列出对象请求参数"
+// @Param        request  query      dto.ListAllObjectsRequest  true  "列出对象请求参数"
 // @Success      200     {object}   vo.Result{data=[]string}  "获取成功"
 // @Failure      400     {object}   vo.Result              "请求参数错误"
 // @Failure      500     {object}   vo.Result              "服务器错误"
 // @Security     BearerAuth
-// @Router       /oss/listObjects [post]
+// @Router       /oss/listObjects [get]
 func ListAllObjects(c echo.Context) error {
 	req := new(dto.ListAllObjectsRequest)
-	if err := c.Bind(req); err != nil {
+	if err := (&echo.DefaultBinder{}).BindQueryParams(c, req); err != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
-	errors := utils.Validator(*req)
+	errors := utils.Validator(req)
 	if errors != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST)))
 	}

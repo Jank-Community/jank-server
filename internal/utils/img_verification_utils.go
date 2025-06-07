@@ -10,12 +10,12 @@ import (
 )
 
 const (
-	CaptchaSource = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" // 验证码字符源
-	FontFile      = "wqy-microhei.ttc"                     // 字体文件
-	ImgHeight     = 80                                     // 验证码图片高度
-	ImgWidth      = 200                                    // 验证码图片宽度
-	NoiseCount    = 0                                      // 干扰点数量
-	CaptchaLength = 4                                      // 验证码字符长度
+	CAPTCHA_SOURCE = "346789ABCDEFGHJKLMNPQRTUVWXY" // 验证码字符源（移除易混淆字符：0O、1I、5S、2Z）
+	FONT_FILE      = "wqy-microhei.ttc"             // 字体文件
+	IMG_HEIGHT     = 80                             // 验证码图片高度
+	IMG_WIDTH      = 200                            // 验证码图片宽度
+	NOISE_COUNT    = 0                              // 干扰点数量
+	CAPTCHA_LENGTH = 4                              // 验证码字符长度
 )
 
 var store = base64Captcha.DefaultMemStore
@@ -41,12 +41,12 @@ func GenImgVerificationCode() (string, string, error) {
 //   - *base64Captcha.DriverString: 验证码驱动对象
 func createDriver() *base64Captcha.DriverString {
 	return &base64Captcha.DriverString{
-		Height:          ImgHeight,
-		Width:           ImgWidth,
-		NoiseCount:      NoiseCount,
+		Height:          IMG_HEIGHT,
+		Width:           IMG_WIDTH,
+		NoiseCount:      NOISE_COUNT,
 		ShowLineOptions: base64Captcha.OptionShowSineLine,
-		Length:          CaptchaLength,
-		Source:          CaptchaSource,
-		Fonts:           []string{FontFile},
+		Length:          CAPTCHA_LENGTH,
+		Source:          CAPTCHA_SOURCE,
+		Fonts:           []string{FONT_FILE},
 	}
 }

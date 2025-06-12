@@ -74,6 +74,13 @@ type MinioConfig struct {
 	MinioSessionToken string `mapstructure:"MINIO_SESSION_TOKEN"`
 }
 
+type EsConfig struct {
+	EsHost     string `mapstructure:"ES_HOST"`
+	EsPort     string `mapstructure:"ES_PORT"`
+	EsUser     string `mapstructure:"ES_USER"`
+	EsPassword string `mapstructure:"ES_PSW"`
+}
+
 // Config 总配置结构
 type Config struct {
 	AppConfig   AppConfig      `mapstructure:"APP"`
@@ -81,6 +88,7 @@ type Config struct {
 	RedisConfig RedisConfig    `mapstructure:"REDIS"`
 	LogConfig   LogConfig      `mapstructure:"LOG"`
 	MinioConfig MinioConfig    `mapstructure:"MINIO"`
+	EsConfig    EsConfig       `mapstructure:"ES"`
 }
 
 // DefaultConfigPath 默认配置文件路径

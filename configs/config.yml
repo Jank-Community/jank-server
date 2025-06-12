@@ -39,6 +39,13 @@ MINIO:
   MINIO_SESSION_TOKEN: "" # MinIO 临时安全凭证（可选，通常为空字符串）
   MINIO_USE_SSL: false # 是否启用 SSL
 
+# Es 相关
+ES:
+  ES_HOST: "127.0.0.1" # TODO: docker配置
+  ES_PORT: "9200"
+  ES_USER: "<ELASTICSEARCH_USERNAME>"
+  ES_PSW: "<ELASTICSEARCH_PASSWORD>"
+
 # 日志相关
 LOG:
   LOG_FILE_PATH: ".logs/"

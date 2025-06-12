@@ -8,6 +8,7 @@ import (
 	"io"
 
 	"github.com/minio/minio-go/v7"
+	"github.com/olivere/elastic/v7"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -16,6 +17,11 @@ import (
 // 数据库相关全局变量
 var (
 	DB *gorm.DB // 全局 db 对象，用于数据库操作
+)
+
+// ES 相关全局变量
+var (
+	EsClient *elastic.Client // 全局 ES 客户端对象，用于 Elasticsearch 操作
 )
 
 // 缓存相关全局变量

@@ -18,7 +18,7 @@ import (
 // SendImgVerificationCode godoc
 // @Summary      生成图形验证码并返回Base64编码
 // @Description  生成单个图形验证码并将其返回为Base64编码字符串，用户可以用该验证码进行校验。
-// @Tags         账户
+// @Tags         用户
 // @Accept       json
 // @Produce      json
 // @Param        email  query   string  true  "邮箱地址，用于生成验证码"
@@ -46,15 +46,15 @@ func SendImgVerificationCode(c echo.Context) error {
 }
 
 // SendEmailVerificationCode godoc
-// @Summary 发送邮箱验证码
+// @Summary 	发送邮箱验证码
 // @Description 向指定邮箱发送验证码，验证码有效期为3分钟
-// @Tags 账户
-// @Accept json
-// @Produce json
-// @Param email query string true "邮箱地址，用于发送验证码"
-// @Success 200 {object} vo.Result "邮箱验证码发送成功, 请注意查收邮件"
-// @Failure 400 {object} vo.Result "请求参数错误，邮箱地址为空"
-// @Failure 500 {object} vo.Result "服务器错误，邮箱验证码发送失败"
+// @Tags 		用户
+// @Accept 		json
+// @Produce 	json
+// @Param 		email  query	string  true  "邮箱地址，用于发送验证码"
+// @Success 	200    {object} vo.Result "邮箱验证码发送成功, 请注意查收邮件"
+// @Failure 	400    {object} vo.Result "请求参数错误，邮箱地址为空"
+// @Failure 	500    {object} vo.Result "服务器错误，邮箱验证码发送失败"
 // @Router /verification/sendEmailVerificationCode [get]
 func SendEmailVerificationCode(c echo.Context) error {
 	req := new(dto.GetOneVerificationCode)

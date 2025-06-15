@@ -5,12 +5,12 @@ package comment
 
 // CommentsVO 获取评论响应
 // @Description 获取单个评论的响应
-// @Property id                  body string  			 true  "评论唯一标识"
-// @Property content             body string  			 true  "评论内容"
-// @Property account_id          body string              true  "评论所属用户ID"
-// @Property post_id             body string              true  "评论所属文章ID"
-// @Property reply_to_comment_id body string              false "回复的目标评论ID"
-// @Property replies             body []*CommentsVO true  "子评论列表"
+// @Property ID                  body string  			  true  "评论唯一标识"
+// @Property Content             body string  		      true  "评论内容"
+// @Property AccountId           body string              true  "评论所属用户 ID"
+// @Property PostId              body string              true  "评论所属文章 ID"
+// @Property ReplyToCommentId    body string              true  "回复的目标评论 ID"
+// @Property Replies             body []*CommentsVO       true  "子评论列表"
 type CommentsVO struct {
 	ID               string        `json:"id"`
 	Content          string        `json:"content"`

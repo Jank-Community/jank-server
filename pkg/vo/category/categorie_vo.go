@@ -5,12 +5,12 @@ package category
 
 // CategoriesVO 获取类目响应
 // @Description 获取类目响应
-// @Property		id			body	string	true	"类目唯一标识"
-// @Property		name		body	string	true	"类目名称"
-// @Property		description	body	string	true	"类目描述"
-// @Property		parent_id	body	string	true	"父类目ID"
-// @Property		path		body	string	true	"类目路径"
-// @Property		children	body	[]*CategoriesVO	true	"子类目列表"
+// @Property		ID			body	string	true	"类目唯一标识"
+// @Property		Name		body	string	true	"类目名称"
+// @Property		Description	body	string	true	"类目描述"
+// @Property		ParentID	body	string	true	"父类目 ID"
+// @Property		Path		body	string	true	"类目路径"
+// @Property		Children	body	[]*CategoriesVO	true	"子类目列表"
 type CategoriesVO struct {
 	ID          string          `json:"id"`
 	Name        string          `json:"name"`

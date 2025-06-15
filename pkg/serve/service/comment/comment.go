@@ -5,7 +5,6 @@ package service
 
 import (
 	"fmt"
-
 	"github.com/labstack/echo/v4"
 
 	model "jank.com/jank_blog/internal/model/comment"
@@ -30,7 +29,7 @@ func CreateComment(c echo.Context, req *dto.CreateCommentRequest) (*comment.Comm
 		return nil, fmt.Errorf("access_token 解析失败: %w", err)
 	}
 
-	acc, err := mapper.GetAccountByAccountID(c, accountID)
+	acc, err := mapper.GetOneAccountByID(c, accountID)
 	if err != nil {
 		utils.BizLogger(c).Errorf("「%s」用户不存在: %v", acc.Email, err)
 		return nil, fmt.Errorf("「%s」用户不存在: %w", acc.Email, err)
@@ -41,11 +40,11 @@ func CreateComment(c echo.Context, req *dto.CreateCommentRequest) (*comment.Comm
 		com := &model.Comment{
 			Content:          req.Content,
 			AccountId:        accountID,
-			PostId:           req.PostId,
+			PostId:           req.PostID,
 			ReplyToCommentId: req.ReplyToCommentId,
 		}
 
-		if err := mapper.CreateComment(c, com); err != nil {
+		if err := mapper.CreateOneComment(c, com); err != nil {
 			utils.BizLogger(c).Errorf("创建评论失败：%v", err)
 			return fmt.Errorf("创建评论失败：%w", err)
 		}
@@ -76,13 +75,13 @@ func CreateComment(c echo.Context, req *dto.CreateCommentRequest) (*comment.Comm
 //   - *comment.CommentsVO: 评论及其回复的视图对象
 //   - error: 操作过程中的错误
 func GetCommentWithReplies(c echo.Context, req *dto.GetOneCommentRequest) (*comment.CommentsVO, error) {
-	com, err := mapper.GetCommentByID(c, req.ID)
+	com, err := mapper.GetOneCommentByID(c, req.ID)
 	if err != nil {
 		utils.BizLogger(c).Errorf("获取评论失败：%v", err)
 		return nil, fmt.Errorf("获取评论失败：%w", err)
 	}
 
-	replies, err := mapper.GetReplyByCommentID(c, req.ID)
+	replies, err := mapper.GetOneReplyByCommentID(c, req.ID)
 	if err != nil {
 		utils.BizLogger(c).Errorf("获取子评论失败：%v", err)
 		return nil, fmt.Errorf("获取子评论失败：%w", err)
@@ -108,7 +107,7 @@ func GetCommentWithReplies(c echo.Context, req *dto.GetOneCommentRequest) (*comm
 //   - []*comment.CommentsVO: 评论图结构列表
 //   - error: 操作过程中的错误
 func GetCommentGraphByPostID(c echo.Context, req *dto.GetCommentGraphRequest) ([]*comment.CommentsVO, error) {
-	comments, err := mapper.GetCommentsByPostID(c, req.PostID)
+	comments, err := mapper.GetOneCommentsByPostID(c, req.PostID)
 	if err != nil {
 		utils.BizLogger(c).Errorf("获取评论图失败：%v", err)
 		return nil, fmt.Errorf("获取评论图失败：%w", err)
@@ -175,14 +174,14 @@ func DeleteComment(c echo.Context, req *dto.DeleteCommentRequest) (*comment.Comm
 	var commentVO *comment.CommentsVO
 
 	err := utils.RunDBTransaction(c, func(tx error) error {
-		com, err := mapper.GetCommentByID(c, req.ID)
+		com, err := mapper.GetOneCommentByID(c, req.ID)
 		if err != nil {
 			utils.BizLogger(c).Errorf("获取评论失败：%v", err)
 			return fmt.Errorf("评论不存在：%w", err)
 		}
 
 		com.Deleted = true
-		if err := mapper.UpdateComment(c, com); err != nil {
+		if err := mapper.UpdateOneComment(c, com); err != nil {
 			utils.BizLogger(c).Errorf("软删除评论失败：%v", err)
 			return fmt.Errorf("软删除评论失败：%w", err)
 		}

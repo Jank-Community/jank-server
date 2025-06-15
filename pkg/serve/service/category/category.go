@@ -25,7 +25,7 @@ import (
 //   - interface{}: 获取到的类目视图对象
 //   - error: 操作过程中的错误
 func GetCategoryByID(c echo.Context, req *dto.GetOneCategoryRequest) (*category.CategoriesVO, error) {
-	cat, err := mapper.GetCategoryByID(c, req.ID)
+	cat, err := mapper.GetOneCategoryByID(c, req.ID)
 	if err != nil {
 		utils.BizLogger(c).Errorf("根据 ID 获取类目失败: %v", err)
 		return nil, fmt.Errorf("根据 ID 获取类目失败: %w", err)
@@ -48,7 +48,7 @@ func GetCategoryByID(c echo.Context, req *dto.GetOneCategoryRequest) (*category.
 //   - []*category.CategoriesVO: 类目树结构
 //   - error: 操作过程中的错误
 func GetCategoryTree(c echo.Context) ([]*category.CategoriesVO, error) {
-	categories, err := mapper.GetAllActivatedCategories(c)
+	categories, err := mapper.GetAllCategories(c)
 	if err != nil {
 		utils.BizLogger(c).Errorf("获取类目树失败: %v", err)
 		return nil, fmt.Errorf("获取类目树失败: %w", err)
@@ -96,7 +96,7 @@ func GetCategoryTree(c echo.Context) ([]*category.CategoriesVO, error) {
 //   - []*category.CategoriesVO: 子类目列表
 //   - error: 操作过程中的错误
 func GetCategoryChildrenByID(c echo.Context, req *dto.GetOneCategoryRequest) ([]*category.CategoriesVO, error) {
-	categories, err := mapper.GetAllActivatedCategories(c)
+	categories, err := mapper.GetAllCategories(c)
 	if err != nil {
 		utils.BizLogger(c).Errorf("根据 ID 获取层级子类目失败: %v", err)
 		return nil, fmt.Errorf("根据 ID 获取层级子类目失败: %w", err)
@@ -163,7 +163,7 @@ func CreateCategory(c echo.Context, req *dto.CreateOneCategoryRequest) (*categor
 
 		// 处理父类目路径
 		if req.ParentID != 0 {
-			parentCat, err := mapper.GetCategoryByID(c, req.ParentID)
+			parentCat, err := mapper.GetOneCategoryByID(c, req.ParentID)
 			if err != nil {
 				utils.BizLogger(c).Errorf("获取父类目失败: %v", err)
 				return fmt.Errorf("获取父类目失败: %w", err)
@@ -177,7 +177,7 @@ func CreateCategory(c echo.Context, req *dto.CreateOneCategoryRequest) (*categor
 		}
 
 		// 创建类目
-		if err := mapper.CreateCategory(c, newCategory); err != nil {
+		if err := mapper.CreateOneCategory(c, newCategory); err != nil {
 			utils.BizLogger(c).Errorf("创建类目失败: %v", err)
 			return fmt.Errorf("创建类目失败: %w", err)
 		}
@@ -211,7 +211,7 @@ func UpdateCategory(c echo.Context, req *dto.UpdateOneCategoryRequest) (*categor
 	var updatedVO *category.CategoriesVO
 
 	err := utils.RunDBTransaction(c, func(tx error) error {
-		existingCategory, err := mapper.GetCategoryByID(c, req.ID)
+		existingCategory, err := mapper.GetOneCategoryByID(c, req.ID)
 		if err != nil {
 			utils.BizLogger(c).Errorf("获取类目失败: %v", err)
 			return fmt.Errorf("获取类目失败: %w", err)
@@ -224,7 +224,7 @@ func UpdateCategory(c echo.Context, req *dto.UpdateOneCategoryRequest) (*categor
 
 		var parentPath string
 		if req.ParentID != 0 {
-			parentCategory, err := mapper.GetCategoryByID(c, req.ParentID)
+			parentCategory, err := mapper.GetOneCategoryByID(c, req.ParentID)
 			if err != nil {
 				utils.BizLogger(c).Errorf("获取父类目「%d」失败: %v", req.ParentID, err)
 				return fmt.Errorf("获取父类目「%d」失败: %w", req.ParentID, err)
@@ -251,7 +251,7 @@ func UpdateCategory(c echo.Context, req *dto.UpdateOneCategoryRequest) (*categor
 			existingCategory.Path = fmt.Sprintf("%s/%d", parentPath, req.ParentID)
 		}
 
-		if err := mapper.UpdateCategory(c, existingCategory); err != nil {
+		if err := mapper.UpdateOneCategoryByID(c, existingCategory); err != nil {
 			utils.BizLogger(c).Errorf("更新类目失败: %v", err)
 			return fmt.Errorf("更新类目失败: %w", err)
 		}
@@ -292,13 +292,13 @@ func DeleteCategory(c echo.Context, req *dto.DeleteOneCategoryRequest) ([]*categ
 	var deletedCategoriesVO []*category.CategoriesVO
 
 	err := utils.RunDBTransaction(c, func(tx error) error {
-		cat, err := mapper.GetCategoryByID(c, req.ID)
+		cat, err := mapper.GetOneCategoryByID(c, req.ID)
 		if err != nil {
 			utils.BizLogger(c).Errorf("获取类目失败: %v", err)
 			return fmt.Errorf("获取类目失败: %w", err)
 		}
 
-		categoriesToDelete, err := mapper.GetCategoriesByPath(c, cat.Path)
+		categoriesToDelete, err := mapper.GetOneCategoriesByPath(c, cat.Path)
 		if err != nil {
 			utils.BizLogger(c).Errorf("获取子类目失败: %v", err)
 			return fmt.Errorf("获取子类目失败: %w", err)
@@ -320,14 +320,14 @@ func DeleteCategory(c echo.Context, req *dto.DeleteOneCategoryRequest) ([]*categ
 
 		// 删除相关文章-类目关联
 		for _, categoryID := range categoryIDs {
-			if err := mapper.DeletePostCategoryByCategoryID(c, categoryID); err != nil {
+			if err := mapper.DeleteOnePostCategoryByCategoryID(c, categoryID); err != nil {
 				utils.BizLogger(c).Errorf("删除类目「%d」的文章关联失败: %v", categoryID, err)
 				return fmt.Errorf("删除类目「%d」的文章关联失败: %w", categoryID, err)
 			}
 		}
 
 		// 软删除类目
-		if err := mapper.DeleteCategoriesByPathSoftly(c, cat.Path, req.ID); err != nil {
+		if err := mapper.DeleteOneCategoriesByIDandPath(c, req.ID, cat.Path); err != nil {
 			utils.BizLogger(c).Errorf("软删除类目失败: %v", err)
 			return fmt.Errorf("软删除类目失败: %w", err)
 		}
@@ -383,7 +383,7 @@ func DeleteCategory(c echo.Context, req *dto.DeleteOneCategoryRequest) ([]*categ
 // 返回值：
 //   - error: 操作过程中的错误
 func recursivelyUpdateChildrenPaths(c echo.Context, parentCategory *model.Category) error {
-	children, err := mapper.GetCategoriesByParentID(c, parentCategory.ID)
+	children, err := mapper.GetOneCategoriesByParentID(c, parentCategory.ID)
 	if err != nil {
 		return fmt.Errorf("获取子类目失败: %w", err)
 	}
@@ -395,7 +395,7 @@ func recursivelyUpdateChildrenPaths(c echo.Context, parentCategory *model.Catego
 			child.Path = fmt.Sprintf("%s/%d", parentCategory.Path, parentCategory.ID)
 		}
 
-		if err := mapper.UpdateCategory(c, child); err != nil {
+		if err := mapper.UpdateOneCategoryByID(c, child); err != nil {
 			return fmt.Errorf("更新子类目路径失败: %w", err)
 		}
 

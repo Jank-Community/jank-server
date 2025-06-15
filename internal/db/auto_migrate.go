@@ -13,6 +13,7 @@ import (
 
 // autoMigrate 执行数据库表结构自动迁移
 func autoMigrate() error {
+	// 执行表结构迁移
 	err := global.DB.AutoMigrate(
 		model.GetAllModels()...,
 	)
@@ -22,6 +23,11 @@ func autoMigrate() error {
 
 	log.Println("数据库自动迁移成功...")
 	global.SysLog.Info("数据库自动迁移成功...")
+
+	// 初始化种子数据
+	if err := seedDefaultData(); err != nil {
+		return fmt.Errorf("初始化种子数据失败 %w", err)
+	}
 
 	return nil
 }

@@ -5,14 +5,14 @@ package post
 
 // PostsVO    获取帖子的响应结构
 // @Description	获取帖子时返回的响应数据
-// @Property			id			    	body	string	true	"帖子唯一标识"
-// @Property			title			    body	string	true	"帖子标题"
-// @Property			image			    body	string	true	"帖子封面图片 URL"
-// @Property			visibility		    body	bool	true	"帖子可见性状态"
-// @Property			content_html		body	string	true	"帖子 HTML 格式内容"
-// @Property			category_id	    	body	string	true	"帖子所属分类 ID"
-// @Property			gmt_create	    	body	string	true	"创建时间（格式化时间）"
-// @Property			gmt_modified	    body	string	true	"更新时间（格式化时间）"
+// @Property			ID			    	body	string	true	"帖子唯一标识"
+// @Property			Title			    body	string	true	"帖子标题"
+// @Property			Image			    body	string	true	"帖子封面图片 URL"
+// @Property			Visibility		    body	bool	true	"帖子可见性状态"
+// @Property			ContentHTML		    body	string	true	"帖子 HTML 格式内容"
+// @Property			CategoryID	    	body	string	true	"帖子所属分类 ID"
+// @Property			GmtCreate	    	body	string	true	"创建时间（格式化时间）"
+// @Property			GmtModified	        body	string	true	"更新时间（格式化时间）"
 type PostsVO struct {
 	ID         string `json:"id"`
 	Title      string `json:"title"`

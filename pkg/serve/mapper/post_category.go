@@ -12,7 +12,7 @@ import (
 	"jank.com/jank_blog/internal/utils"
 )
 
-// CreatePostCategory 创建文章-类目关联
+// CreateOnePostCategory 创建文章-类目关联
 // 参数：
 //   - c: Echo 上下文
 //   - postID: 文章 ID
@@ -20,7 +20,7 @@ import (
 //
 // 返回值：
 //   - error: 操作过程中的错误
-func CreatePostCategory(c echo.Context, postID, categoryID int64) error {
+func CreateOnePostCategory(c echo.Context, postID, categoryID int64) error {
 	postCategory := &association.PostCategory{
 		PostID:     postID,
 		CategoryID: categoryID,
@@ -32,7 +32,7 @@ func CreatePostCategory(c echo.Context, postID, categoryID int64) error {
 	return nil
 }
 
-// GetPostCategory 获取文章-类目关联
+// GetOnePostCategoryByPostID 获取文章-类目关联
 // 参数：
 //   - c: Echo 上下文
 //   - postID: 文章 ID
@@ -40,7 +40,7 @@ func CreatePostCategory(c echo.Context, postID, categoryID int64) error {
 // 返回值：
 //   - *association.PostCategory: 文章-类目关联信息
 //   - error: 操作过程中的错误
-func GetPostCategory(c echo.Context, postID int64) (*association.PostCategory, error) {
+func GetOnePostCategoryByPostID(c echo.Context, postID int64) (*association.PostCategory, error) {
 	var postCategory association.PostCategory
 	db := utils.GetDBFromContext(c)
 	err := db.Where("post_id = ? AND deleted = ?", postID, false).First(&postCategory).Error
@@ -53,7 +53,7 @@ func GetPostCategory(c echo.Context, postID int64) (*association.PostCategory, e
 	return &postCategory, nil
 }
 
-// UpdatePostCategory 更新文章-类目关联
+// UpdateOnePostCategoryByPostID 更新文章-类目关联
 // 参数：
 //   - c: Echo 上下文
 //   - postID: 文章 ID
@@ -61,55 +61,50 @@ func GetPostCategory(c echo.Context, postID int64) (*association.PostCategory, e
 //
 // 返回值：
 //   - error: 操作过程中的错误
-func UpdatePostCategory(c echo.Context, postID, categoryID int64) error {
+func UpdateOnePostCategoryByPostID(c echo.Context, postID, categoryID int64) error {
 	var exists int64
 	db := utils.GetDBFromContext(c)
-	if err := db.Model(&association.PostCategory{}).
-		Where("post_id = ? AND deleted = ?", postID, false).
+	if err := db.Where("post_id = ? AND deleted = ?", postID, false).
 		Count(&exists).Error; err != nil {
 		return fmt.Errorf("检查文章-类目关联失败: %w", err)
 	}
 	if exists > 0 {
-		if err := db.Model(&association.PostCategory{}).
-			Where("post_id = ? AND deleted = ?", postID, false).
+		if err := db.Model(&association.PostCategory{}).Where("post_id = ? AND deleted = ?", postID, false).
 			Update("category_id", categoryID).Error; err != nil {
 			return fmt.Errorf("更新文章-类目关联失败: %w", err)
 		}
 	} else {
-		return CreatePostCategory(c, postID, categoryID)
+		return CreateOnePostCategory(c, postID, categoryID)
 	}
-
 	return nil
 }
 
-// DeletePostCategory 删除文章-类目关联
+// DeleteOnePostCategoryByPostID 删除文章-类目关联
 // 参数：
 //   - c: Echo 上下文
 //   - postID: 文章 ID
 //
 // 返回值：
 //   - error: 操作过程中的错误
-func DeletePostCategory(c echo.Context, postID int64) error {
+func DeleteOnePostCategoryByPostID(c echo.Context, postID int64) error {
 	db := utils.GetDBFromContext(c)
-	if err := db.Model(&association.PostCategory{}).
-		Where("post_id = ? AND deleted = ?", postID, false).
+	if err := db.Model(&association.PostCategory{}).Where("post_id = ? AND deleted = ?", postID, false).
 		Update("deleted", true).Error; err != nil {
 		return fmt.Errorf("删除文章-类目关联失败: %w", err)
 	}
 	return nil
 }
 
-// DeletePostCategoryByCategoryID 根据类目ID删除文章-类目关联
+// DeleteOnePostCategoryByCategoryID 根据类目ID删除文章-类目关联
 // 参数：
 //   - c: Echo 上下文
 //   - categoryID: 类目 ID
 //
 // 返回值：
 //   - error: 操作过程中的错误
-func DeletePostCategoryByCategoryID(c echo.Context, categoryID int64) error {
+func DeleteOnePostCategoryByCategoryID(c echo.Context, categoryID int64) error {
 	db := utils.GetDBFromContext(c)
-	if err := db.Model(&association.PostCategory{}).
-		Where("category_id = ? AND deleted = ?", categoryID, false).
+	if err := db.Model(&association.PostCategory{}).Where("category_id = ? AND deleted = ?", categoryID, false).
 		Update("deleted", true).Error; err != nil {
 		return fmt.Errorf("根据类目ID删除文章-类目关联失败: %w", err)
 	}

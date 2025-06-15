@@ -1,4 +1,4 @@
-// Package account 提供账户相关的HTTP接口处理
+// Package account 提供用户相关的HTTP接口处理
 // 创建者：Done-0
 // 创建时间：2025-05-10
 package account
@@ -18,13 +18,13 @@ import (
 // RegisterAcc godoc
 // @Summary      用户注册
 // @Description  注册新用户账号，支持图形验证码和邮箱验证码校验
-// @Tags         账户
+// @Tags         用户
 // @Accept       json
 // @Produce      json
-// @Param        request  body      dto.RegisterRequest  true  "注册信息"
+// @Param        request  body      dto.RegisterOneAccountRequest  true  "注册信息"
 // @Param        ImgVerificationCode  query   string  true  "图形验证码"
 // @Param        EmailVerificationCode  query   string  true  "邮箱验证码"
-// @Success      200     {object}   vo.Result{data=dto.RegisterRequest}  "注册成功"
+// @Success      200     {object}   vo.Result{data=dto.RegisterOneAccountRequest}  "注册成功"
 // @Failure      400     {object}   vo.Result         "参数错误，验证码校验失败"
 // @Failure      500     {object}   vo.Result         "服务器错误"
 // @Router       /account/registerAccount [post]
@@ -34,12 +34,12 @@ import (
 // 返回值：
 //   - error: 操作过程中的错误
 func RegisterAcc(c echo.Context) error {
-	req := new(dto.RegisterRequest)
+	req := new(dto.RegisterOneAccountRequest)
 	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
-	errors := utils.Validator(*req)
+	errors := utils.Validator(req)
 	if errors != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST, "请求参数校验失败")))
 	}
@@ -52,7 +52,7 @@ func RegisterAcc(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST, "邮箱验证码校验失败")))
 	}
 
-	acc, err := service.RegisterAcc(c, req)
+	acc, err := service.RegisterOneAccount(c, req)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, vo.Fail(c, err, bizErr.New(bizErr.SERVER_ERR, err.Error())))
 	}
@@ -63,10 +63,10 @@ func RegisterAcc(c echo.Context) error {
 // LoginAccount godoc
 // @Summary      用户登录
 // @Description  用户登录并获取访问令牌，支持图形验证码校验
-// @Tags         账户
+// @Tags         用户
 // @Accept       json
 // @Produce      json
-// @Param        request  body      dto.LoginRequest  true  "登录信息"
+// @Param        request  body      dto.LoginOneAccountRequest  true  "登录信息"
 // @Param        ImgVerificationCode  query   string  true  "图形验证码"
 // @Success      200     {object}   vo.Result{data=account.LoginVO}  "登录成功，返回访问令牌"
 // @Failure      400     {object}   vo.Result         "参数错误，验证码校验失败"
@@ -78,12 +78,12 @@ func RegisterAcc(c echo.Context) error {
 // 返回值：
 //   - error: 操作过程中的错误
 func LoginAccount(c echo.Context) error {
-	req := new(dto.LoginRequest)
+	req := new(dto.LoginOneAccountRequest)
 	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
 
-	errors := utils.Validator(*req)
+	errors := utils.Validator(req)
 	if errors != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST, "请求参数校验失败")))
 	}
@@ -92,7 +92,7 @@ func LoginAccount(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST, "图形验证码校验失败")))
 	}
 
-	response, err := service.LoginAcc(c, req)
+	response, err := service.LoginOneAccount(c, req)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, vo.Fail(c, err, bizErr.New(bizErr.SERVER_ERR, err.Error())))
 	}
@@ -101,12 +101,12 @@ func LoginAccount(c echo.Context) error {
 }
 
 // GetAccount godoc
-// @Summary      获取账户信息
+// @Summary      获取用户信息
 // @Description  根据提供的邮箱获取对应用户的详细信息
-// @Tags         账户
+// @Tags         用户
 // @Accept       json
 // @Produce      json
-// @Param        request  query      dto.GetAccountRequest  true  "获取账户请求参数"
+// @Param        request  query      dto.GetOneAccountRequest  true  "获取账户请求参数"
 // @Success      200     {object}   vo.Result{data=account.GetAccountVO}  "获取成功"
 // @Failure      400     {object}   vo.Result              "请求参数错误"
 // @Failure      404     {object}   vo.Result              "用户不存在"
@@ -117,7 +117,7 @@ func LoginAccount(c echo.Context) error {
 // 返回值：
 //   - error: 操作过程中的错误
 func GetAccount(c echo.Context) error {
-	req := new(dto.GetAccountRequest)
+	req := new(dto.GetOneAccountRequest)
 	if err := (&echo.DefaultBinder{}).BindQueryParams(c, req); err != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
@@ -127,7 +127,7 @@ func GetAccount(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST, "请求参数校验失败")))
 	}
 
-	response, err := service.GetAccount(c, req)
+	response, err := service.GetOneAccount(c, req)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, vo.Fail(c, err, bizErr.New(bizErr.SERVER_ERR, err.Error())))
 	}
@@ -136,12 +136,12 @@ func GetAccount(c echo.Context) error {
 }
 
 // UpdateAccount godoc
-// @Summary      更新账户信息
+// @Summary      更新用户信息
 // @Description  更新当前登录用户的账户信息
-// @Tags         账户
+// @Tags         用户
 // @Accept       json
 // @Produce      json
-// @Param        request  body      dto.UpdateAccountRequest  true  "更新账户信息"
+// @Param        request  body      dto.UpdateOneAccountRequest  true  "更新账户信息"
 // @Success      200     {object}   vo.Result{data=account.UpdateAccountVO}  "更新成功"
 // @Failure      400     {object}   vo.Result              "请求参数错误"
 // @Failure      401     {object}   vo.Result              "未授权"
@@ -154,7 +154,7 @@ func GetAccount(c echo.Context) error {
 // 返回值：
 //   - error: 操作过程中的错误
 func UpdateAccount(c echo.Context) error {
-	req := new(dto.UpdateAccountRequest)
+	req := new(dto.UpdateOneAccountRequest)
 	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
 	}
@@ -164,7 +164,7 @@ func UpdateAccount(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST, "请求参数校验失败")))
 	}
 
-	response, err := service.UpdateAccount(c, req)
+	response, err := service.UpdateOneAccountByID(c, req)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, vo.Fail(c, err, bizErr.New(bizErr.SERVER_ERR, err.Error())))
 	}
@@ -175,7 +175,7 @@ func UpdateAccount(c echo.Context) error {
 // LogoutAccount godoc
 // @Summary      用户登出
 // @Description  退出当前用户登录状态
-// @Tags         账户
+// @Tags         用户
 // @Produce      json
 // @Success      200  {object}  vo.Result{data=string}  "登出成功"
 // @Failure      401  {object}  vo.Result  "未授权"
@@ -188,7 +188,7 @@ func UpdateAccount(c echo.Context) error {
 // 返回值：
 //   - error: 操作过程中的错误
 func LogoutAccount(c echo.Context) error {
-	if err := service.LogoutAcc(c); err != nil {
+	if err := service.LogoutOneAccount(c); err != nil {
 		return c.JSON(http.StatusInternalServerError, vo.Fail(c, err, bizErr.New(bizErr.SERVER_ERR, err.Error())))
 	}
 
@@ -198,7 +198,7 @@ func LogoutAccount(c echo.Context) error {
 // ResetPassword godoc
 // @Summary      重置密码
 // @Description  重置用户账户密码，支持邮箱验证码校验
-// @Tags         账户
+// @Tags         用户
 // @Accept       json
 // @Produce      json
 // @Param        request  body      dto.ResetPwdRequest  true  "重置密码信息"

@@ -4,9 +4,9 @@
 package dto
 
 // CreateOneCategoryRequest       创建类目请求
-// @Param name        body string true  "类目名称"
-// @Param description body string false "类目描述"
-// @Param parent_id   body int64  false "父类目ID"
+// @Param Name        body string true  "类目名称"
+// @Param Description body string false "类目描述"
+// @Param ParentID    body int64  false "父类目 ID"
 type CreateOneCategoryRequest struct {
 	Name        string `json:"name" xml:"name" form:"name" query:"name" validate:"required,min=1"`
 	Description string `json:"description" xml:"description" form:"description" query:"description" default:""`
@@ -14,22 +14,22 @@ type CreateOneCategoryRequest struct {
 }
 
 // DeleteOneCategoryRequest  删除类目请求
-// @Param id path int64 true "类目ID"
+// @Param ID path int64 true "类目 ID"
 type DeleteOneCategoryRequest struct {
 	ID int64 `json:"id,string" xml:"id" form:"id" query:"id" validate:"required"`
 }
 
-// GetOneCategoryRequest 更新类目请求
-// @Param id path int64 true "类目ID"
+// GetOneCategoryRequest 获取类目请求
+// @Param ID path int64 true "类目 ID"
 type GetOneCategoryRequest struct {
 	ID int64 `json:"id,string" xml:"id" form:"id" query:"id" validate:"required"`
 }
 
 // UpdateOneCategoryRequest    更新类目请求
-// @Param id          path     int64   true  "类目ID"
-// @Param name        body     string  true  "类目名称"
-// @Param description body     string  false "类目描述"
-// @Param parent_id   body     int64   false "父类目ID"
+// @Param ID          body     int64   true  "类目 ID"
+// @Param Name        body     string  true  "类目名称"
+// @Param Description body     string  false "类目描述"
+// @Param ParentID    body     int64   false "父类目 ID"
 type UpdateOneCategoryRequest struct {
 	ID          int64  `json:"id,string" xml:"id" form:"id" query:"id" validate:"required"`
 	Name        string `json:"name" xml:"name" form:"name" query:"name" validate:"required,min=1,max=255"`

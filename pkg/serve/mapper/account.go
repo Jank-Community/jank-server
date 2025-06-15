@@ -1,4 +1,4 @@
-// Package mapper 提供数据模型与数据库交互的映射层，处理账户相关数据操作
+// Package mapper 提供数据模型与数据库交互的映射层，处理用户相关数据操作
 // 创建者：Done-0
 // 创建时间：2025-05-10
 package mapper
@@ -12,31 +12,36 @@ import (
 	"jank.com/jank_blog/internal/utils"
 )
 
-// GetTotalAccounts 获取系统中的总账户数
+// CheckFirstUserExists 检查系统中是否已存在用户
 // 参数：
 //   - c: Echo 上下文
 //
 // 返回值：
-//   - int64: 账户总数
+//   - bool: 是否存在用户
 //   - error: 操作过程中的错误
-func GetTotalAccounts(c echo.Context) (int64, error) {
-	var count int64
+func CheckFirstUserExists(c echo.Context) (bool, error) {
 	db := utils.GetDBFromContext(c)
-	if err := db.Model(&account.Account{}).Where("deleted = ?", false).Count(&count).Error; err != nil {
-		return 0, fmt.Errorf("获取用户总数失败: %w", err)
+
+	var exists bool
+	query := `SELECT EXISTS(SELECT 1 FROM accounts WHERE CAST(deleted AS INTEGER) = 0 LIMIT 1)`
+
+	err := db.Raw(query).Scan(&exists).Error
+	if err != nil {
+		return false, fmt.Errorf("检查用户存在性失败: %w", err)
 	}
-	return count, nil
+
+	return exists, nil
 }
 
-// GetAccountByEmail 根据邮箱获取用户账户信息
+// GetOneAccountByEmail 根据邮箱获取用户账号信息
 // 参数：
 //   - c: Echo 上下文
 //   - email: 用户邮箱
 //
 // 返回值：
-//   - *account.Account: 账户信息
+//   - *account.Account: 用户信息
 //   - error: 操作过程中的错误
-func GetAccountByEmail(c echo.Context, email string) (*account.Account, error) {
+func GetOneAccountByEmail(c echo.Context, email string) (*account.Account, error) {
 	var user account.Account
 	db := utils.GetDBFromContext(c)
 	if err := db.Where("email = ? AND deleted = ?", email, false).First(&user).Error; err != nil {
@@ -45,15 +50,15 @@ func GetAccountByEmail(c echo.Context, email string) (*account.Account, error) {
 	return &user, nil
 }
 
-// GetAccountByAccountID 根据用户 ID 获取账户信息
+// GetOneAccountByID 根据用户 ID 获取用户账号信息
 // 参数：
 //   - c: Echo 上下文
-//   - accountID: 账户 ID
+//   - accountID: 用户 ID
 //
 // 返回值：
 //   - *account.Account: 账户信息
 //   - error: 操作过程中的错误
-func GetAccountByAccountID(c echo.Context, accountID int64) (*account.Account, error) {
+func GetOneAccountByID(c echo.Context, accountID int64) (*account.Account, error) {
 	var user account.Account
 	db := utils.GetDBFromContext(c)
 	if err := db.Where("id = ? AND deleted = ?", accountID, false).First(&user).Error; err != nil {
@@ -62,31 +67,31 @@ func GetAccountByAccountID(c echo.Context, accountID int64) (*account.Account, e
 	return &user, nil
 }
 
-// CreateAccount 创建新用户
+// CreateOneAccount 创建新用户
 // 参数：
 //   - c: Echo 上下文
 //   - acc: 账户信息
 //
 // 返回值：
 //   - error: 操作过程中的错误
-func CreateAccount(c echo.Context, acc *account.Account) error {
+func CreateOneAccount(c echo.Context, account *account.Account) error {
 	db := utils.GetDBFromContext(c)
-	if err := db.Create(acc).Error; err != nil {
+	if err := db.Create(account).Error; err != nil {
 		return fmt.Errorf("创建用户失败: %w", err)
 	}
 	return nil
 }
 
-// UpdateAccount 更新账户信息
+// UpdateOneAccountByID 更新账户信息
 // 参数：
 //   - c: Echo 上下文
 //   - acc: 账户信息
 //
 // 返回值：
 //   - error: 操作过程中的错误
-func UpdateAccount(c echo.Context, acc *account.Account) error {
+func UpdateOneAccountByID(c echo.Context, account *account.Account) error {
 	db := utils.GetDBFromContext(c)
-	if err := db.Save(acc).Error; err != nil {
+	if err := db.Where("id = ? AND deleted = ?", account.ID, false).Updates(account).Error; err != nil {
 		return fmt.Errorf("更新账户失败: %w", err)
 	}
 	return nil

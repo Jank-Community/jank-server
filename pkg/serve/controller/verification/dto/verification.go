@@ -4,7 +4,7 @@
 package dto
 
 // GetOneVerificationCode            获取图形验证码
-// @Param			email	    body	string	true	"用户邮箱"
+// @Param			Email	    body	string	true	"用户邮箱"
 type GetOneVerificationCode struct {
 	Email string `json:"email" xml:"email" form:"email" query:"email" validate:"required,email"`
 }

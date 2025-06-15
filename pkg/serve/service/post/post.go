@@ -70,7 +70,7 @@ func CreateOnePost(c echo.Context, req *dto.CreateOnePostRequest) (*post.PostsVO
 	}
 
 	if categoryID > 0 {
-		_, err := mapper.GetCategoryByID(c, categoryID)
+		_, err := mapper.GetOneCategoryByID(c, categoryID)
 		if err != nil {
 			utils.BizLogger(c).Errorf("类目ID「%d」不存在: %v", categoryID, err)
 			return nil, fmt.Errorf("类目ID「%d」不存在: %w", categoryID, err)
@@ -94,12 +94,12 @@ func CreateOnePost(c echo.Context, req *dto.CreateOnePostRequest) (*post.PostsVO
 			ContentHTML:     contentHTML,
 		}
 
-		if err := mapper.CreatePost(c, newPost); err != nil {
+		if err := mapper.CreateOnePost(c, newPost); err != nil {
 			utils.BizLogger(c).Errorf("创建文章失败: %v", err)
 			return fmt.Errorf("创建文章失败: %w", err)
 		}
 
-		if err := mapper.CreatePostCategory(c, newPost.ID, categoryID); err != nil {
+		if err := mapper.CreateOnePostCategory(c, newPost.ID, categoryID); err != nil {
 			utils.BizLogger(c).Errorf("创建文章-类目关联失败: %v", err)
 			return fmt.Errorf("创建文章-类目关联失败: %w", err)
 		}
@@ -132,7 +132,7 @@ func CreateOnePost(c echo.Context, req *dto.CreateOnePostRequest) (*post.PostsVO
 //   - interface{}: 获取到的文章视图对象
 //   - error: 操作过程中的错误
 func GetOnePostByID(c echo.Context, req *dto.GetOnePostRequest) (*post.PostsVO, error) {
-	pos, err := mapper.GetPostByID(c, req.ID)
+	pos, err := mapper.GetOnePostByID(c, req.ID)
 	if err != nil {
 		utils.BizLogger(c).Errorf("根据 ID 获取文章失败: %v", err)
 		return nil, fmt.Errorf("根据 ID 获取文章失败: %w", err)
@@ -150,7 +150,7 @@ func GetOnePostByID(c echo.Context, req *dto.GetOnePostRequest) (*post.PostsVO, 
 
 	postsVO := vo.(*post.PostsVO)
 
-	postCategory, err := mapper.GetPostCategory(c, pos.ID)
+	postCategory, err := mapper.GetOnePostCategoryByPostID(c, pos.ID)
 	if err != nil {
 		utils.BizLogger(c).Errorf("获取文章类目关联失败: %v", err)
 	}
@@ -188,7 +188,7 @@ func GetAllPostsWithPagingAndFormat(c echo.Context, page, pageSize int) (map[str
 
 		postVO := vo.(*post.PostsVO)
 
-		postCategory, err := mapper.GetPostCategory(c, pos.ID)
+		postCategory, err := mapper.GetOnePostCategoryByPostID(c, pos.ID)
 		if err != nil {
 			utils.BizLogger(c).Errorf("获取文章ID「%d」的类目关联失败: %v", pos.ID, err)
 		}
@@ -224,7 +224,7 @@ func UpdateOnePost(c echo.Context, req *dto.UpdateOnePostRequest) (*post.PostsVO
 	var contentMarkdown string
 	var categoryID int64
 
-	pos, err := mapper.GetPostByID(c, req.ID)
+	pos, err := mapper.GetOnePostByID(c, req.ID)
 	if err != nil || pos == nil {
 		utils.BizLogger(c).Errorf("获取文章失败: %v", err)
 		return nil, fmt.Errorf("获取文章失败: %w", err)
@@ -297,7 +297,7 @@ func UpdateOnePost(c echo.Context, req *dto.UpdateOnePostRequest) (*post.PostsVO
 	}
 
 	if categoryID > 0 {
-		_, err := mapper.GetCategoryByID(c, categoryID)
+		_, err := mapper.GetOneCategoryByID(c, categoryID)
 		if err != nil {
 			utils.BizLogger(c).Errorf("类目ID「%d」不存在: %v", categoryID, err)
 			return nil, fmt.Errorf("类目ID「%d」不存在: %w", categoryID, err)
@@ -307,12 +307,12 @@ func UpdateOnePost(c echo.Context, req *dto.UpdateOnePostRequest) (*post.PostsVO
 	var postsVO *post.PostsVO
 
 	err = utils.RunDBTransaction(c, func(tx error) error {
-		if err := mapper.UpdateOnePostByID(c, req.ID, pos); err != nil {
+		if err := mapper.UpdateOnePostByID(c, pos); err != nil {
 			utils.BizLogger(c).Errorf("更新文章失败: %v", err)
 			return fmt.Errorf("更新文章失败: %w", err)
 		}
 
-		if err := mapper.UpdatePostCategory(c, req.ID, categoryID); err != nil {
+		if err := mapper.UpdateOnePostCategoryByPostID(c, req.ID, categoryID); err != nil {
 			utils.BizLogger(c).Errorf("更新文章-类目关联失败: %v", err)
 			return fmt.Errorf("更新文章-类目关联失败: %w", err)
 		}
@@ -350,7 +350,7 @@ func DeleteOnePost(c echo.Context, req *dto.DeleteOnePostRequest) error {
 			return fmt.Errorf("删除文章失败: %w", err)
 		}
 
-		if err := mapper.DeletePostCategory(c, req.ID); err != nil {
+		if err := mapper.DeleteOnePostCategoryByPostID(c, req.ID); err != nil {
 			utils.BizLogger(c).Errorf("删除文章-类目关联失败: %v", err)
 			return fmt.Errorf("删除文章-类目关联失败: %w", err)
 		}

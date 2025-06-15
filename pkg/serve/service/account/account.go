@@ -31,7 +31,7 @@ const (
 	USER_CACHE_EXPIRE_TIME = time.Hour * 2 // Access Token 有效期
 )
 
-// GetAccount 获取用户信息逻辑
+// GetOneAccount 获取用户信息逻辑
 // 参数：
 //   - c: Echo 上下文
 //   - req: 获取账户请求
@@ -39,8 +39,8 @@ const (
 // 返回值：
 //   - *account.GetAccountVO: 用户账户视图对象
 //   - error: 操作过程中的错误
-func GetAccount(c echo.Context, req *dto.GetAccountRequest) (*account.GetAccountVO, error) {
-	userInfo, err := mapper.GetAccountByEmail(c, req.Email)
+func GetOneAccount(c echo.Context, req *dto.GetOneAccountRequest) (*account.GetAccountVO, error) {
+	userInfo, err := mapper.GetOneAccountByEmail(c, req.Email)
 	if err != nil {
 		utils.BizLogger(c).Errorf("「%s」用户不存在", req.Email)
 		return nil, fmt.Errorf("「%s」用户不存在", req.Email)
@@ -55,7 +55,7 @@ func GetAccount(c echo.Context, req *dto.GetAccountRequest) (*account.GetAccount
 	return vo.(*account.GetAccountVO), nil
 }
 
-// RegisterAcc 用户注册逻辑
+// RegisterOneAccount 用户注册逻辑
 // 参数：
 //   - c: Echo 上下文
 //   - req: 注册账户请求
@@ -63,25 +63,21 @@ func GetAccount(c echo.Context, req *dto.GetAccountRequest) (*account.GetAccount
 // 返回值：
 //   - *account.RegisterAccountVO: 注册后的账户视图对象
 //   - error: 操作过程中的错误
-func RegisterAcc(c echo.Context, req *dto.RegisterRequest) (*account.RegisterAccountVO, error) {
+func RegisterOneAccount(c echo.Context, req *dto.RegisterOneAccountRequest) (*account.RegisterAccountVO, error) {
 	registerLock.Lock()
 	defer registerLock.Unlock()
 
 	var registerVO *account.RegisterAccountVO
 
 	err := utils.RunDBTransaction(c, func(tx error) error {
-		totalAccounts, err := mapper.GetTotalAccounts(c)
+		// 检查是否已存在用户
+		firstUserExists, err := mapper.CheckFirstUserExists(c)
 		if err != nil {
-			utils.BizLogger(c).Errorf("获取用户总数失败: %v", err)
-			return fmt.Errorf("获取用户总数失败: %w", err)
+			utils.BizLogger(c).Errorf("检查首个用户失败: %v", err)
+			return fmt.Errorf("检查首个用户失败: %w", err)
 		}
 
-		if totalAccounts > 0 {
-			utils.BizLogger(c).Error("系统限制: 当前为单用户独立部署版本，已达到账户数量上限 (1/1)")
-			return fmt.Errorf("系统限制: 当前为单用户独立部署版本，已达到账户数量上限 (1/1)")
-		}
-
-		existingUser, _ := mapper.GetAccountByEmail(c, req.Email)
+		existingUser, _ := mapper.GetOneAccountByEmail(c, req.Email)
 		if existingUser != nil {
 			utils.BizLogger(c).Errorf("「%s」邮箱已被注册", req.Email)
 			return fmt.Errorf("「%s」邮箱已被注册", req.Email)
@@ -100,9 +96,49 @@ func RegisterAcc(c echo.Context, req *dto.RegisterRequest) (*account.RegisterAcc
 			Phone:    req.Phone,
 		}
 
-		if err := mapper.CreateAccount(c, acc); err != nil {
+		if err := mapper.CreateOneAccount(c, acc); err != nil {
 			utils.BizLogger(c).Errorf("「%s」用户注册失败: %v", req.Email, err)
 			return fmt.Errorf("「%s」用户注册失败: %w", req.Email, err)
+		}
+
+		// 如果是首个用户，将其设置为超级管理员
+		if !firstUserExists {
+			adminRole, err := mapper.GetRoleByName(c, "admin")
+			if err != nil {
+				utils.BizLogger(c).Errorf("获取管理员角色失败: %v", err)
+				return fmt.Errorf("获取管理员角色失败: %w", err)
+			}
+
+			accountRole := &model.AccountRole{
+				AccountID: acc.ID,
+				RoleID:    adminRole.ID,
+			}
+
+			if err := mapper.AssignRolesToOneAccountByIDs(c, accountRole); err != nil {
+				utils.BizLogger(c).Errorf("为首个用户分配管理员角色失败: %v", err)
+				return fmt.Errorf("为首个用户分配管理员角色失败: %w", err)
+			}
+
+			utils.BizLogger(c).Infof("「%s」用户被设置为系统管理员", acc.Email)
+		} else {
+			// 非首个用户，设置为普通用户
+			userRole, err := mapper.GetRoleByName(c, "user")
+			if err != nil {
+				utils.BizLogger(c).Errorf("获取普通用户角色失败: %v", err)
+				return fmt.Errorf("获取普通用户角色失败: %w", err)
+			}
+
+			accountRole := &model.AccountRole{
+				AccountID: acc.ID,
+				RoleID:    userRole.ID,
+			}
+
+			if err := mapper.AssignRolesToOneAccountByIDs(c, accountRole); err != nil {
+				utils.BizLogger(c).Errorf("为用户分配普通用户角色失败: %v", err)
+				return fmt.Errorf("为用户分配普通用户角色失败: %w", err)
+			}
+
+			utils.BizLogger(c).Infof("「%s」用户被设置为普通用户", acc.Email)
 		}
 
 		vo, err := utils.MapModelToVO(acc, &account.RegisterAccountVO{})
@@ -122,7 +158,7 @@ func RegisterAcc(c echo.Context, req *dto.RegisterRequest) (*account.RegisterAcc
 	return registerVO, nil
 }
 
-// LoginAcc 登录用户逻辑
+// LoginOneAccount 登录用户逻辑
 // 参数：
 //   - c: Echo 上下文
 //   - req: 登录请求
@@ -130,8 +166,8 @@ func RegisterAcc(c echo.Context, req *dto.RegisterRequest) (*account.RegisterAcc
 // 返回值：
 //   - *account.LoginVO: 登录成功后的令牌视图对象
 //   - error: 操作过程中的错误
-func LoginAcc(c echo.Context, req *dto.LoginRequest) (*account.LoginVO, error) {
-	acc, err := mapper.GetAccountByEmail(c, req.Email)
+func LoginOneAccount(c echo.Context, req *dto.LoginOneAccountRequest) (*account.LoginVO, error) {
+	acc, err := mapper.GetOneAccountByEmail(c, req.Email)
 	if err != nil {
 		utils.BizLogger(c).Errorf("「%s」用户不存在: %v", req.Email, err)
 		return nil, fmt.Errorf("「%s」用户不存在: %w", req.Email, err)
@@ -171,13 +207,13 @@ func LoginAcc(c echo.Context, req *dto.LoginRequest) (*account.LoginVO, error) {
 	return vo.(*account.LoginVO), nil
 }
 
-// LogoutAcc 处理用户登出逻辑
+// LogoutOneAccount 处理用户登出逻辑
 // 参数：
 //   - c: Echo 上下文
 //
 // 返回值：
 //   - error: 操作过程中的错误
-func LogoutAcc(c echo.Context) error {
+func LogoutOneAccount(c echo.Context) error {
 	logoutLock.Lock()
 	defer logoutLock.Unlock()
 
@@ -220,7 +256,7 @@ func ResetPassword(c echo.Context, req *dto.ResetPwdRequest) error {
 			return fmt.Errorf("access_token 解析失败: %w", err)
 		}
 
-		acc, err := mapper.GetAccountByAccountID(c, accountID)
+		acc, err := mapper.GetOneAccountByID(c, accountID)
 		if err != nil {
 			utils.BizLogger(c).Errorf("「%s」用户不存在: %v", acc.Email, err)
 			return fmt.Errorf("「%s」用户不存在: %w", acc.Email, err)
@@ -233,7 +269,7 @@ func ResetPassword(c echo.Context, req *dto.ResetPwdRequest) error {
 		}
 		acc.Password = string(newPassword)
 
-		if err := mapper.UpdateAccount(c, acc); err != nil {
+		if err := mapper.UpdateOneAccountByID(c, acc); err != nil {
 			utils.BizLogger(c).Errorf("「%s」用户密码修改失败: %v", acc.Email, err)
 			return fmt.Errorf("「%s」用户密码修改失败: %w", acc.Email, err)
 		}
@@ -242,7 +278,7 @@ func ResetPassword(c echo.Context, req *dto.ResetPwdRequest) error {
 	})
 }
 
-// UpdateAccount 更新账户信息逻辑
+// UpdateOneAccountByID 更新账户信息逻辑
 // 参数：
 //   - c: Echo 上下文
 //   - req: 更新账户请求
@@ -250,7 +286,7 @@ func ResetPassword(c echo.Context, req *dto.ResetPwdRequest) error {
 // 返回值：
 //   - *account.UpdateAccountVO: 更新后的账户视图对象
 //   - error: 操作过程中的错误
-func UpdateAccount(c echo.Context, req *dto.UpdateAccountRequest) (*account.UpdateAccountVO, error) {
+func UpdateOneAccountByID(c echo.Context, req *dto.UpdateOneAccountRequest) (*account.UpdateAccountVO, error) {
 	var updateVO *account.UpdateAccountVO
 
 	err := utils.RunDBTransaction(c, func(tx error) error {
@@ -260,7 +296,7 @@ func UpdateAccount(c echo.Context, req *dto.UpdateAccountRequest) (*account.Upda
 			return fmt.Errorf("access_token 解析失败: %w", err)
 		}
 
-		acc, err := mapper.GetAccountByAccountID(c, accountID)
+		acc, err := mapper.GetOneAccountByID(c, accountID)
 		if err != nil {
 			utils.BizLogger(c).Errorf("获取「%s」用户信息失败: %v", acc.Email, err)
 			return fmt.Errorf("获取「%s」用户信息失败: %w", acc.Email, err)
@@ -270,7 +306,7 @@ func UpdateAccount(c echo.Context, req *dto.UpdateAccountRequest) (*account.Upda
 		acc.Phone = req.Phone
 		acc.Avatar = req.Avatar
 
-		if err := mapper.UpdateAccount(c, acc); err != nil {
+		if err := mapper.UpdateOneAccountByID(c, acc); err != nil {
 			utils.BizLogger(c).Errorf("更新「%s」用户信息失败: %v", acc.Email, err)
 			return fmt.Errorf("更新「%s」用户信息失败: %w", acc.Email, err)
 		}

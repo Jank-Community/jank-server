@@ -18,7 +18,7 @@ var NewValidator = validator.New()
 
 // Validator 参数验证器
 // 参数：
-//   - data: 待验证的数据
+//   - data: 待验证的数据或数据指针
 //
 // 返回值：
 //   - []ValidErrRes: 验证错误结果数组

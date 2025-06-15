@@ -12,22 +12,22 @@ import (
 	"jank.com/jank_blog/internal/utils"
 )
 
-// CreatePost 将文章保存到数据库
+// CreateOnePost 将文章保存到数据库
 // 参数：
 //   - c: Echo 上下文
 //   - newPost: 文章信息
 //
 // 返回值：
 //   - error: 操作过程中的错误
-func CreatePost(c echo.Context, newPost *post.Post) error {
+func CreateOnePost(c echo.Context, post *post.Post) error {
 	db := utils.GetDBFromContext(c)
-	if err := db.Create(newPost).Error; err != nil {
+	if err := db.Create(post).Error; err != nil {
 		return fmt.Errorf("创建文章失败: %w", err)
 	}
 	return nil
 }
 
-// GetPostByID 根据 ID 获取文章
+// GetOnePostByID 根据 ID 获取文章
 // 参数：
 //   - c: Echo 上下文
 //   - id: 文章 ID
@@ -35,7 +35,7 @@ func CreatePost(c echo.Context, newPost *post.Post) error {
 // 返回值：
 //   - *post.Post: 文章信息
 //   - error: 操作过程中的错误
-func GetPostByID(c echo.Context, id int64) (*post.Post, error) {
+func GetOnePostByID(c echo.Context, id int64) (*post.Post, error) {
 	var pos post.Post
 	db := utils.GetDBFromContext(c)
 	if err := db.Where("id = ? AND deleted = ?", id, false).First(&pos).Error; err != nil {
@@ -60,7 +60,7 @@ func GetAllPostsWithPaging(c echo.Context, page, pageSize int) ([]*post.Post, in
 	db := utils.GetDBFromContext(c)
 
 	// 查询文章总数
-	if err := db.Model(&post.Post{}).Where("deleted = ?", false).Count(&total).Error; err != nil {
+	if err := db.Where("deleted = ?", false).Count(&total).Error; err != nil {
 		return nil, 0, fmt.Errorf("获取文章总数失败: %w", err)
 	}
 
@@ -82,9 +82,9 @@ func GetAllPostsWithPaging(c echo.Context, page, pageSize int) ([]*post.Post, in
 //
 // 返回值：
 //   - error: 操作过程中的错误
-func UpdateOnePostByID(c echo.Context, postID int64, newPost *post.Post) error {
+func UpdateOnePostByID(c echo.Context, post *post.Post) error {
 	db := utils.GetDBFromContext(c)
-	result := db.Model(&post.Post{}).Where("id = ? AND deleted = ?", postID, false).Updates(newPost)
+	result := db.Where("id = ? AND deleted = ?", post.ID, false).Updates(post)
 
 	if result.Error != nil {
 		return fmt.Errorf("更新文章失败: %w", result.Error)
@@ -101,8 +101,7 @@ func UpdateOnePostByID(c echo.Context, postID int64, newPost *post.Post) error {
 //   - error: 操作过程中的错误
 func DeleteOnePostByID(c echo.Context, postID int64) error {
 	db := utils.GetDBFromContext(c)
-	result := db.Model(&post.Post{}).
-		Where("id = ? AND deleted = ?", postID, false).
+	result := db.Model(&post.Post{}).Where("id = ? AND deleted = ?", postID, false).
 		Update("deleted", true)
 
 	if result.Error != nil {

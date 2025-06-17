@@ -1,0 +1,163 @@
+// proto/plugin_market.proto
+syntax = "proto3";
+
+package plugin_market;
+
+option go_package = "./plugin_market";
+
+// PluginInfo 定义了插件的基本信息
+message PluginInfo {
+  string id = 1;         // 唯一ID (UUID或其他)
+  string name = 2;       // 插件名称
+  string version = 3;    // 插件版本
+  string author = 4;     // 作者
+  string description = 5; // 描述
+  string address = 6;    // 插件 gRPC 服务监听地址 (例如: "localhost:50051")
+  PluginStatus status = 7; // 插件状态
+}
+
+// PluginStatus 枚举定义插件的生命周期状态
+enum PluginStatus {
+  UNKNOWN = 0;
+  REGISTERED = 1;  // 插件已注册但可能未激活或未运行
+  RUNNING = 2;     // 插件正在运行并可用
+  STOPPED = 3;     // 插件已停止
+  ERROR = 4;       // 插件发生错误
+  DISABLED = 5;    // 插件被禁用
+}
+
+// RegisterRequest 用于插件向管理器注册
+message RegisterRequest {
+  PluginInfo plugin_info = 1;
+}
+
+// RegisterResponse 注册响应
+message RegisterResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// UnregisterRequest 用于插件向管理器注销
+message UnregisterRequest {
+  string plugin_id = 1;
+}
+
+// UnregisterResponse 注销响应
+message UnregisterResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// HeartbeatRequest 用于插件向管理器发送心跳
+message HeartbeatRequest {
+  string plugin_id = 1;
+  PluginStatus current_status = 2;
+}
+
+// HeartbeatResponse 心跳响应
+message HeartbeatResponse {
+  bool success = 1;
+}
+
+// GetPluginRequest 用于宿主查询特定插件
+message GetPluginRequest {
+  string plugin_id = 1;
+}
+
+// GetPluginResponse 查询特定插件响应
+message GetPluginResponse {
+  PluginInfo plugin_info = 1;
+}
+
+// ListPluginsRequest 用于宿主查询所有插件
+message ListPluginsRequest {
+  // 可以添加过滤条件，例如根据状态、名称等
+  PluginStatus status_filter = 1; // 0 for all
+}
+
+// ListPluginsResponse 查询所有插件响应
+message ListPluginsResponse {
+  repeated PluginInfo plugins = 1;
+}
+
+// UpdatePluginStatusRequest 用于宿主更新插件状态（例如启用/禁用）
+message UpdatePluginStatusRequest {
+  string plugin_id = 1;
+  PluginStatus new_status = 2;
+}
+
+// UpdatePluginStatusResponse 更新插件状态响应
+message UpdatePluginStatusResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+
+// PluginManagerService 是插件管理器提供的 gRPC 服务
+service PluginManagerService {
+  // 插件注册与生命周期管理
+  rpc RegisterPlugin(RegisterRequest) returns (RegisterResponse);
+  rpc UnregisterPlugin(UnregisterRequest) returns (UnregisterResponse);
+  rpc SendHeartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+
+  // 宿主插件管理
+  rpc GetPlugin(GetPluginRequest) returns (GetPluginResponse);
+  rpc ListPlugins(ListPluginsRequest) returns (ListPluginsResponse);
+  rpc UpdatePluginStatus(UpdatePluginStatusRequest) returns (UpdatePluginStatusResponse);
+}
+
+
+// IPluginService 是插件必须实现的接口，供宿主调用
+service IPluginService {
+  rpc Execute(ExecuteRequest) returns (ExecuteResponse);
+  rpc StreamData(stream StreamDataRequest) returns (stream StreamDataResponse);
+}
+
+// ExecuteRequest 插件执行请求
+message ExecuteRequest {
+  string method = 1; // 调用的插件方法名
+  string payload = 2; // JSON或其他序列化数据
+}
+
+// ExecuteResponse 插件执行响应
+message ExecuteResponse {
+  bool success = 1;
+  string result = 2; // JSON或其他序列化数据
+  string error_message = 3;
+}
+
+// StreamDataRequest 用于插件宿主向插件发送流数据
+message StreamDataRequest {
+  string data = 1;
+  int32 sequence_num = 2;
+}
+
+// StreamDataResponse 用于插件向宿主发送流数据响应
+message StreamDataResponse {
+  string response_data = 1;
+  int32 sequence_num = 2;
+}
+
+// HostService 是宿主可能实现的接口，供插件反向调用
+service HostService {
+  rpc Log(LogRequest) returns (LogResponse);
+  rpc GetHostConfig(GetHostConfigRequest) returns (GetHostConfigResponse);
+}
+
+message LogRequest {
+  string level = 1;
+  string message = 2;
+}
+
+message LogResponse {
+  bool success = 1;
+}
+
+message GetHostConfigRequest {
+  string key = 1;
+}
+
+message GetHostConfigResponse {
+  string value = 1;
+  bool found = 2;
+}

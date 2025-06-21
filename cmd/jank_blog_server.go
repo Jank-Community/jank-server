@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	service "jank.com/jank_blog/pkg/serve/service/plugin"
 	"log"
 
 	"github.com/labstack/echo/v4"
@@ -52,6 +53,9 @@ func Start() {
 
 	// 初始化 MinIO 客户端
 	oss.New(config)
+
+	// 启动插件服务
+	service.InitPlugin()
 
 	// 注册路由
 	router.New(app)

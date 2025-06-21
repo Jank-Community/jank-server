@@ -8,6 +8,7 @@ import (
 	association "jank.com/jank_blog/internal/model/association"
 	category "jank.com/jank_blog/internal/model/category"
 	comment "jank.com/jank_blog/internal/model/comment"
+	plugin "jank.com/jank_blog/internal/model/plugin"
 	post "jank.com/jank_blog/internal/model/post"
 )
 
@@ -30,5 +31,8 @@ func GetAllModels() []interface{} {
 
 		// association 跨模块中间表
 		&association.PostCategory{},
+
+		// plugin 模块
+		&plugin.Plugin{},
 	}
 }

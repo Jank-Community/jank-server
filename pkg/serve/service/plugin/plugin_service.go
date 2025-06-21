@@ -1,107 +1,53 @@
 package service
 
 import (
-	"crypto/md5"
+	"context"
 	"fmt"
-	"jank.com/jank_blog/internal/model/plugin"
-	"jank.com/jank_blog/internal/storage"
+	"jank.com/jank_blog/internal/plugin_rpc"
+	"log"
 	"time"
 )
 
-// PluginService 插件服务
-type PluginService struct {
-	store *storage.MemoryStore
-}
+func CallPlugin(ctx context.Context, host *plugin_rpc.PluginHost) {
+	{
+		ticker := time.NewTicker(10 * time.Second) // 每10秒尝试调用
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				if len(host.LoadedPlugins) > 0 {
+					// 获取第一个连接的插件ID（仅作示例，实际应有更智能的选择逻辑）
+					var firstPluginID string
+					for id := range host.LoadedPlugins {
+						firstPluginID = id
+						break
+					}
+					if firstPluginID != "" {
+						payload := map[string]interface{}{
+							"input": fmt.Sprintf("Hello from Host! Time: %s", time.Now().Format(time.RFC3339)),
+						}
+						result, err := host.CallPluginExecute(ctx, firstPluginID, "processData", payload)
+						if err != nil {
+							log.Printf("调用插件 %s Execute 失败: %v", firstPluginID, err)
+						} else {
+							log.Printf("调用插件 %s Execute 成功，结果: %s", firstPluginID, result)
+						}
 
-// NewPluginService 创建插件服务
-func NewPluginService() *PluginService {
-	return &PluginService{
-		store: storage.NewMemoryStore(),
+						// 尝试调用流式接口
+						//streamMessages := []string{
+						//	"Stream Msg 1",
+						//	"Stream Msg 2",
+						//	"Stream Msg 3",
+						//}
+						//err = host.CallPluginStreamData(ctx, firstPluginID, streamMessages)
+						//if err != nil {
+						//	log.Printf("调用插件 %s StreamData 失败: %v", firstPluginID, err)
+						//}
+					}
+				}
+			}
+		}
 	}
-}
-
-// RegisterPlugin 注册插件
-func (ps *PluginService) RegisterPlugin(plugin *model.Plugin) (string, error) {
-	// 验证插件信息
-	if err := plugin.ValidatePlugin(); err != nil {
-		return "", err
-	}
-
-	// 生成插件ID
-	if plugin.ID == "" {
-		plugin.ID = ps.generatePluginID(plugin.Name, plugin.Author)
-	}
-
-	// 设置默认值
-	plugin.IsActive = true
-	plugin.DownloadCount = 0
-	plugin.Rating = 0.0
-
-	// 存储插件
-	if err := ps.store.CreatePlugin(plugin); err != nil {
-		return "", err
-	}
-
-	return plugin.ID, nil
-}
-
-// GetPlugin 获取插件
-func (ps *PluginService) GetPlugin(id string) (*model.Plugin, error) {
-	return ps.store.GetPlugin(id)
-}
-
-// UpdatePlugin 更新插件
-func (ps *PluginService) UpdatePlugin(plugin *model.Plugin) error {
-	// 验证插件信息
-	if err := plugin.ValidatePlugin(); err != nil {
-		return err
-	}
-
-	return ps.store.UpdatePlugin(plugin)
-}
-
-// DeletePlugin 删除插件
-func (ps *PluginService) DeletePlugin(id string) error {
-	return ps.store.DeletePlugin(id)
-}
-
-// ListPlugins 列出插件
-func (ps *PluginService) ListPlugins(category string, tags []string, searchQuery string, page, pageSize int, sortBy string, ascending bool) ([]*model.Plugin, int, error) {
-	if page <= 0 {
-		page = 1
-	}
-	if pageSize <= 0 {
-		pageSize = 10
-	}
-
-	return ps.store.ListPlugins(category, tags, searchQuery, page, pageSize, sortBy, ascending)
-}
-
-// SearchPlugins 搜索插件
-func (ps *PluginService) SearchPlugins(query string, limit int) ([]*model.Plugin, error) {
-	if limit <= 0 {
-		limit = 10
-	}
-
-	return ps.store.SearchPlugins(query, limit)
-}
-
-// DownloadPlugin 下载插件
-func (ps *PluginService) DownloadPlugin(id string) (string, error) {
-	plugin, err := ps.store.GetPlugin(id)
-	if err != nil {
-		return "", err
-	}
-
-	// 增加下载计数
-	plugin.DownloadCount++
-	ps.store.UpdatePlugin(plugin)
-
-	return plugin.DownloadURL, nil
-}
-
-// generatePluginID 生成插件ID
-func (ps *PluginService) generatePluginID(name, author string) string {
-	data := fmt.Sprintf("%s-%s-%d", name, author, time.Now().UnixNano())
-	return fmt.Sprintf("%x", md5.Sum([]byte(data)))
 }

@@ -40,4 +40,6 @@ func New(app *echo.Echo) {
 	routes.RegisterCommentRoutes(api1)
 	// 注册对象存储路由
 	routes.RegisterOssRoutes(api1)
+	// 注册插件管理路由
+	routes.RegisterPluginRoutes(api1)
 }

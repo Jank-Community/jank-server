@@ -7,12 +7,12 @@ option go_package = "./plugin_market";
 
 // PluginInfo 定义了插件的基本信息
 message PluginInfo {
-  string id = 1;         // 唯一ID (UUID)
+  string id = 1;         // 唯一ID (UUID或其他)
   string name = 2;       // 插件名称
   string version = 3;    // 插件版本
   string author = 4;     // 作者
   string description = 5; // 描述
-  string address = 6;    // 插件 gRPC 服务监听地址
+  string address = 6;    // 插件 gRPC 服务监听地址 (例如: "localhost:50051")
   PluginStatus status = 7; // 插件状态
 }
 

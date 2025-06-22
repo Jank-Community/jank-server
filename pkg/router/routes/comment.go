@@ -19,6 +19,8 @@ func RegisterCommentRoutes(r ...*echo.Group) {
 	commentGroupV1 := apiV1.Group("/comment")
 	commentGroupV1.GET("/getOneComment", comment.GetOneComment)
 	commentGroupV1.GET("/getCommentGraph", comment.GetCommentGraph)
+	commentGroupV1.GET("/getPendingComments", comment.GetPendingComments, auth_middleware.AuthMiddleware())
 	commentGroupV1.POST("/createOneComment", comment.CreateOneComment, auth_middleware.AuthMiddleware())
 	commentGroupV1.POST("/deleteOneComment", comment.DeleteOneComment, auth_middleware.AuthMiddleware())
+	commentGroupV1.POST("/updateAuditStatus", comment.UpdateAuditStatus, auth_middleware.AuthMiddleware())
 }

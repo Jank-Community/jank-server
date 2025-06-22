@@ -915,6 +915,122 @@
                 }
             }
         },
+        "/comment/getPendingComments": {
+            "get": {
+                "description": "获取所有待审核的评论",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "评论"
+                ],
+                "summary": "获取待审核评论",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 5,
+                        "description": "每页数量",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/vo.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": true
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    }
+                }
+            }
+        },
+        "/comment/updateAuditStatus": {
+            "post": {
+                "description": "更新评论的审核状态和审核不通过理由",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "评论"
+                ],
+                "summary": "更新评论审核状态",
+                "parameters": [
+                    {
+                        "description": "更新审核状态请求参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateAuditStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/vo.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/comment.CommentsVO"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    },
+                    "404": {
+                        "description": "评论不存在",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Result"
+                        }
+                    }
+                }
+            }
+        },
         "/oss/deleteFile": {
             "post": {
                 "security": [
@@ -1903,6 +2019,12 @@
                 "account_id": {
                     "type": "string"
                 },
+                "audit_reason": {
+                    "type": "string"
+                },
+                "audit_status": {
+                    "$ref": "#/definitions/enums.AuditStatus"
+                },
                 "content": {
                     "type": "string"
                 },
@@ -2136,6 +2258,27 @@
                 }
             }
         },
+        "dto.UpdateAuditStatusRequest": {
+            "type": "object",
+            "required": [
+                "audit_status",
+                "id"
+            ],
+            "properties": {
+                "audit_reason": {
+                    "description": "审核不通过原因",
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "audit_status": {
+                    "$ref": "#/definitions/enums.AuditStatus"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                }
+            }
+        },
         "dto.UpdateOneCategoryRequest": {
             "type": "object",
             "required": [
@@ -2190,6 +2333,24 @@
                     "type": "boolean"
                 }
             }
+        },
+        "enums.AuditStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "approved",
+                "rejected"
+            ],
+            "x-enum-comments": {
+                "AuditApproved": "审核通过",
+                "AuditPending": "待审核",
+                "AuditRejected": "审核不通过"
+            },
+            "x-enum-varnames": [
+                "AuditPending",
+                "AuditApproved",
+                "AuditRejected"
+            ]
         },
         "post.PostsVO": {
             "description": "获取帖子时返回的响应数据",

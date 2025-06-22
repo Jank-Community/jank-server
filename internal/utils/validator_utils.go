@@ -3,7 +3,13 @@
 // 创建时间：2025-05-10
 package utils
 
-import "github.com/go-playground/validator/v10"
+import (
+	"fmt"
+
+	"github.com/go-playground/validator/v10"
+
+	"jank.com/jank_blog/pkg/enums"
+)
 
 // ValidErrRes 验证错误结果结构体
 type ValidErrRes struct {
@@ -15,6 +21,13 @@ type ValidErrRes struct {
 
 // NewValidator 全局验证器实例
 var NewValidator = validator.New()
+
+func init() {
+	err := NewValidator.RegisterValidation("auditStatus", auditStatusValidation)
+	if err != nil {
+		fmt.Printf("自定义验证器注册失败: %v\n", err)
+	}
+}
 
 // Validator 参数验证器
 // 参数：
@@ -37,4 +50,16 @@ func Validator(data interface{}) []ValidErrRes {
 		}
 	}
 	return Errors
+}
+
+// auditStatusValidation 自定义验证器，检查字段值是否为 "approved" 或 "rejected"
+func auditStatusValidation(fl validator.FieldLevel) bool {
+	value := fl.Field().String()
+
+	switch value {
+	case string(enums.AuditApproved), string(enums.AuditRejected):
+		return true // 允许的值
+	default:
+		return false // 不允许的值
+	}
 }

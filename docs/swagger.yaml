@@ -55,6 +55,10 @@ definitions:
     properties:
       account_id:
         type: string
+      audit_reason:
+        type: string
+      audit_status:
+        $ref: '#/definitions/enums.AuditStatus'
       content:
         type: string
       id:
@@ -220,6 +224,21 @@ definitions:
     required:
     - nickname
     type: object
+  dto.UpdateAuditStatusRequest:
+    properties:
+      audit_reason:
+        description: 审核不通过原因
+        maxLength: 255
+        type: string
+      audit_status:
+        $ref: '#/definitions/enums.AuditStatus'
+      id:
+        example: "0"
+        type: string
+    required:
+    - audit_status
+    - id
+    type: object
   dto.UpdateOneCategoryRequest:
     properties:
       description:
@@ -259,6 +278,20 @@ definitions:
     required:
     - id
     type: object
+  enums.AuditStatus:
+    enum:
+    - pending
+    - approved
+    - rejected
+    type: string
+    x-enum-comments:
+      AuditApproved: 审核通过
+      AuditPending: 待审核
+      AuditRejected: 审核不通过
+    x-enum-varnames:
+    - AuditPending
+    - AuditApproved
+    - AuditRejected
   post.PostsVO:
     description: 获取帖子时返回的响应数据
     properties:
@@ -844,6 +877,77 @@ paths:
           schema:
             $ref: '#/definitions/vo.Result'
       summary: 获取评论图
+      tags:
+      - 评论
+  /comment/getPendingComments:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有待审核的评论
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 5
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/vo.Result'
+            - properties:
+                data:
+                  additionalProperties: true
+                  type: object
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/vo.Result'
+      summary: 获取待审核评论
+      tags:
+      - 评论
+  /comment/updateAuditStatus:
+    post:
+      consumes:
+      - application/json
+      description: 更新评论的审核状态和审核不通过理由
+      parameters:
+      - description: 更新审核状态请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateAuditStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/vo.Result'
+            - properties:
+                data:
+                  $ref: '#/definitions/comment.CommentsVO'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/vo.Result'
+        "404":
+          description: 评论不存在
+          schema:
+            $ref: '#/definitions/vo.Result'
+      summary: 更新评论审核状态
       tags:
       - 评论
   /oss/deleteFile:

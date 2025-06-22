@@ -132,3 +132,63 @@ func DeleteOneComment(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, vo.Success(c, comment))
 }
+
+// GetPendingComments godoc
+// @Summary      获取待审核评论
+// @Description  获取所有待审核的评论
+// @Tags         评论
+// @Accept       json
+// @Produce      json
+// @Param        page      query     int    false  "页码"     default(1)
+// @Param        page_size query     int    false  "每页数量"  default(5)
+// @Success      200       {object} vo.Result{data=map[string]interface{}}  "获取成功"
+// @Failure      400       {object} vo.Result  "请求参数错误"
+// @Router       /comment/getPendingComments [get]
+func GetPendingComments(c echo.Context) error {
+	req := new(dto.GetPendingCommentsRequest)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
+	}
+
+	errors := utils.Validator(req)
+	if errors != nil {
+		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST)))
+	}
+
+	comments, err := service.GetPendingComments(c, req.Page, req.PageSize)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, vo.Fail(c, err, bizErr.New(bizErr.SERVER_ERR, err.Error())))
+	}
+
+	return c.JSON(http.StatusOK, vo.Success(c, comments))
+}
+
+// UpdateAuditStatus godoc
+// @Summary      更新评论审核状态
+// @Description  更新评论的审核状态和审核不通过理由
+// @Tags         评论
+// @Accept       json
+// @Produce      json
+// @Param        request  body      dto.UpdateAuditStatusRequest  true  "更新审核状态请求参数"
+// @Success      200     {object}   vo.Result{data=comment.CommentsVO}  "更新成功"
+// @Failure      400     {object}   vo.Result          "请求参数错误"
+// @Failure      404     {object}   vo.Result          "评论不存在"
+// @Router       /comment/updateAuditStatus [post]
+func UpdateAuditStatus(c echo.Context) error {
+	req := new(dto.UpdateAuditStatusRequest)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusBadRequest, vo.Fail(c, err, bizErr.New(bizErr.BAD_REQUEST, err.Error())))
+	}
+
+	errors := utils.Validator(req)
+	if errors != nil {
+		return c.JSON(http.StatusBadRequest, vo.Fail(c, errors, bizErr.New(bizErr.BAD_REQUEST)))
+	}
+
+	comment, err := service.UpdateAuditStatus(c, req)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, vo.Fail(c, err, bizErr.New(bizErr.SERVER_ERR, err.Error())))
+	}
+
+	return c.JSON(http.StatusOK, vo.Success(c, comment))
+}

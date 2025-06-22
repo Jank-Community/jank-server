@@ -74,13 +74,22 @@ type MinioConfig struct {
 	MinioSessionToken string `mapstructure:"MINIO_SESSION_TOKEN"`
 }
 
+type CommentMQConfig struct {
+	MapKey       string `mapstructure:"COMMENT_MAP_KEY"`
+	StreamKey    string `mapstructure:"COMMENT_STREAM_KEY"`
+	GroupName    string `mapstructure:"COMMENT_STREAM_GROUP"`
+	ConsumerName string `mapstructure:"COMMENT_STREAM_CONSUMER"`
+	MaxLength    int    `mapstructure:"COMMENT_STREAM_MAX_LENGTH"`
+}
+
 // Config 总配置结构
 type Config struct {
-	AppConfig   AppConfig      `mapstructure:"APP"`
-	DBConfig    DatabaseConfig `mapstructure:"DATABASE"`
-	RedisConfig RedisConfig    `mapstructure:"REDIS"`
-	LogConfig   LogConfig      `mapstructure:"LOG"`
-	MinioConfig MinioConfig    `mapstructure:"MINIO"`
+	AppConfig       AppConfig       `mapstructure:"APP"`
+	CommentMQConfig CommentMQConfig `mapstructure:"COMMENT_MQ"`
+	DBConfig        DatabaseConfig  `mapstructure:"DATABASE"`
+	RedisConfig     RedisConfig     `mapstructure:"REDIS"`
+	LogConfig       LogConfig       `mapstructure:"LOG"`
+	MinioConfig     MinioConfig     `mapstructure:"MINIO"`
 }
 
 // DefaultConfigPath 默认配置文件路径

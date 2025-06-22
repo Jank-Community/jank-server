@@ -10,6 +10,7 @@ import (
 
 	model "jank.com/jank_blog/internal/model/comment"
 	"jank.com/jank_blog/internal/utils"
+	"jank.com/jank_blog/pkg/enums"
 )
 
 // CreateComment 保存评论到数据库
@@ -31,14 +32,26 @@ func CreateComment(c echo.Context, comment *model.Comment) error {
 // 参数：
 //   - c: Echo 上下文
 //   - id: 评论 ID
+//   - ignoreAudit: 是否忽略审核状态
 //
 // 返回值：
 //   - *model.Comment: 评论信息
 //   - error: 操作过程中的错误
-func GetCommentByID(c echo.Context, id int64) (*model.Comment, error) {
+func GetCommentByID(c echo.Context, id int64, ignoreAudit bool) (*model.Comment, error) {
 	var comment model.Comment
+	var query string
+	var args []interface{}
 	db := utils.GetDBFromContext(c)
-	if err := db.Where("id = ? AND deleted = ?", id, false).First(&comment).Error; err != nil {
+	// 如果 all 为 true，则不考虑审核状态
+	if ignoreAudit {
+		query = "id = ? AND deleted = ?"
+		args = append(args, id, false)
+	} else {
+		query = "id = ? AND deleted = ? AND audit_status = ?"
+		args = append(args, id, false, enums.AuditApproved)
+	}
+
+	if err := db.Where(query, args...).First(&comment).Error; err != nil {
 		return nil, fmt.Errorf("获取评论失败: %w", err)
 	}
 	return &comment, nil
@@ -48,14 +61,25 @@ func GetCommentByID(c echo.Context, id int64) (*model.Comment, error) {
 // 参数：
 //   - c: Echo 上下文
 //   - id: 评论 ID
+//   - ignoreAudit: 是否忽略审核状态
 //
 // 返回值：
 //   - []*model.Comment: 回复列表
 //   - error: 操作过程中的错误
-func GetReplyByCommentID(c echo.Context, id int64) ([]*model.Comment, error) {
+func GetReplyByCommentID(c echo.Context, id int64, ignoreAudit bool) ([]*model.Comment, error) {
 	var comments []*model.Comment
+	var query string
+	var args []interface{}
 	db := utils.GetDBFromContext(c)
-	if err := db.Where("reply_to_comment_id = ? AND deleted = ?", id, false).Find(&comments).Error; err != nil {
+	// 如果 all 为 true，则不考虑审核状态
+	if ignoreAudit {
+		query = "reply_to_comment_id = ? AND deleted = ?"
+		args = append(args, id, false)
+	} else {
+		query = "reply_to_comment_id = ? AND deleted = ? AND audit_status = ?"
+		args = append(args, id, false, enums.AuditApproved)
+	}
+	if err := db.Where(query, args...).Find(&comments).Error; err != nil {
 		return nil, fmt.Errorf("获取评论回复失败: %w", err)
 	}
 	return comments, nil
@@ -65,17 +89,58 @@ func GetReplyByCommentID(c echo.Context, id int64) ([]*model.Comment, error) {
 // 参数：
 //   - c: Echo 上下文
 //   - postID: 文章 ID
+//   - ignoreAudit: 是否忽略审核状态
 //
 // 返回值：
 //   - []*model.Comment: 评论列表
 //   - error: 操作过程中的错误
-func GetCommentsByPostID(c echo.Context, postID int64) ([]*model.Comment, error) {
+func GetCommentsByPostID(c echo.Context, postID int64, ignoreAudit bool) ([]*model.Comment, error) {
 	var comments []*model.Comment
+	var query string
+	var args []interface{}
 	db := utils.GetDBFromContext(c)
-	if err := db.Where("post_id = ? AND deleted = ?", postID, false).Find(&comments).Error; err != nil {
+	// 如果 all 为 true，则不考虑审核状态
+	if ignoreAudit {
+		query = "post_id = ? AND deleted = ?"
+		args = append(args, postID, false)
+	} else {
+		query = "post_id = ? AND deleted = ? AND audit_status = ?"
+		args = append(args, postID, false, enums.AuditApproved)
+	}
+	if err := db.Where(query, args...).Find(&comments).Error; err != nil {
 		return nil, fmt.Errorf("获取文章评论失败: %w", err)
 	}
 	return comments, nil
+}
+
+// GetPendingComments 获取所有待审核的评论
+// 参数：
+//   - c: Echo 上下文
+//   - page: 页码
+//   - pageSize: 每页数量
+//
+// 返回值：
+//   - []*model.Comment: 待审核评论列表
+//   - int64: 待审核评论总数
+//   - error: 操作过程中的错误
+func GetPendingComments(c echo.Context, page, pageSize int) ([]*model.Comment, int64, error) {
+	var comments []*model.Comment
+	var total int64
+	db := utils.GetDBFromContext(c)
+
+	// 查询待审核评论总数
+	if err := db.Model(&model.Comment{}).Where("audit_status = ? AND deleted = ?", enums.AuditPending, false).Count(&total).Error; err != nil {
+		return nil, 0, fmt.Errorf("获取待审核评论总数失败: %w", err)
+	}
+
+	// 分页查询待审核评论，从旧到新
+	if err := db.Where("audit_status = ? AND deleted = ?", enums.AuditPending, false).
+		Order("id ASC").
+		Limit(pageSize).Offset((page - 1) * pageSize).
+		Find(&comments).Error; err != nil {
+		return nil, 0, fmt.Errorf("获取待审核评论失败: %w", err)
+	}
+	return comments, total, nil
 }
 
 // UpdateComment 更新评论

@@ -39,3 +39,17 @@ var (
 var (
 	AppCtx context.Context
 )
+
+// Storage 定义了消息队列存储的配置
+type Storage struct {
+	MapKey       string // Redis Map 的键
+	StreamKey    string // Redis Stream 的键
+	GroupName    string // 消费者组的名称
+	ConsumerName string // 消费者的名称
+	MaxLength    int    // Redis Stream 的最大长度
+}
+
+// MQStorage 全局消息队列存储对象
+var (
+	MQStorage *Storage
+)

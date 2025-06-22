@@ -1,10 +1,11 @@
 {
 	"info": {
-		"_postman_id": "b0e1355c-b82b-45de-8e9b-293e9a7e46de",
+		"_postman_id": "2530feab-8288-4b1d-8295-b7a0de6bcd34",
 		"name": "Jank_blog",
 		"description": "Jank 博客系统接口文档",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "38426642"
+		"_exporter_id": "44778765",
+		"_collection_link": "https://sunhillyou.postman.co/workspace/Jank~89de0ed0-087b-475b-a42f-bef4a6623119/collection/44778765-2530feab-8288-4b1d-8295-b7a0de6bcd34?action=share&source=collection_link&creator=44778765"
 	},
 	"item": [
 		{
@@ -28,7 +29,7 @@
 							}
 						},
 						"url": {
-							"raw": "127.0.0.1:9010/api/v1/post/getAllPosts?pageSize=5&page=2",
+							"raw": "127.0.0.1:9010/api/v1/post/getAllPosts?page_size=5&page=2",
 							"host": [
 								"127",
 								"0",
@@ -44,7 +45,7 @@
 							],
 							"query": [
 								{
-									"key": "pageSize",
+									"key": "page_size",
 									"value": "5"
 								},
 								{
@@ -117,7 +118,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50X2lkIjoxLCJleHAiOjE3NDAyNDE3MzN9.ptVu2OnP3Lc790xV3ZOiQJduCvKlKmrFw30HA5jWuEg",
+									"value": "{{access_token}}",
 									"type": "string"
 								}
 							]
@@ -139,13 +140,13 @@
 								},
 								{
 									"key": "visibility",
-									"value": "public",
+									"value": "true",
 									"type": "text"
 								},
 								{
 									"key": "content_markdown",
 									"type": "file",
-									"src": "/Users/fender/Documents/WorkSpace/GoSpace/www/jank.com/docs/README.md"
+									"src": "/Users/sunhill/projects/GolandProjects/jank-server/README.md"
 								},
 								{
 									"key": "category_ids",
@@ -728,7 +729,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "127.0.0.1:9010/api/v1/comment/getOneComment?comment_id=1",
+							"raw": "127.0.0.1:9010/api/v1/comment/getOneComment?id=1934974354920050688",
 							"host": [
 								"127",
 								"0",
@@ -744,8 +745,8 @@
 							],
 							"query": [
 								{
-									"key": "comment_id",
-									"value": "1"
+									"key": "id",
+									"value": "1934974354920050688"
 								}
 							]
 						}
@@ -783,13 +784,73 @@
 					"response": []
 				},
 				{
+					"name": "getPendingComments",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "127.0.0.1:9010/api/v1/comment/getPendingComments?page=1&page_size=10",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "9010",
+							"path": [
+								"api",
+								"v1",
+								"comment",
+								"getPendingComments"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "page_size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "createOneComment",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "Refresh-Token",
+								"value": "{{refresh_token}}",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"content\": \"测试评论 1\",\n  \"user_id\": 1,\n  \"post_id\": 5,\n  \"reply_to_comment_id\": 4\n}\n",
+							"raw": "{\n  \"content\": \"测试评论 2\",\n  \"user_id\": \"1926291623507922944\",\n  \"post_id\": \"1934972755854233600\",\n  \"reply_to_comment_id\": \"0\"\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -853,6 +914,49 @@
 								"v1",
 								"comment",
 								"deleteOneComment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateAuditStatus",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"1934974354920050688\",\n    \"audit_status\": \"rejected\",\n    \"audit_reason\": \"哒咩！\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "127.0.0.1:9010/api/v1/comment/updateAuditStatus",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "9010",
+							"path": [
+								"api",
+								"v1",
+								"comment",
+								"updateAuditStatus"
 							]
 						}
 					},
@@ -950,13 +1054,37 @@
 				},
 				{
 					"name": "loginAccount",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData=JSON.parse(pm.response.text());",
+									"pm.environment.set(\"access_token\", jsonData.data.access_token);",
+									"pm.environment.set(\"refresh_token\", jsonData.data.refresh_token);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
 					"request": {
 						"auth": {
 							"type": "bearer",
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZpcnN0OTI3MTcxNTk4QDE2My5jb20iLCJleHAiOjE3MzExMzQzMzksInVzZXJJZCI6OH0.yNW9rAK1CeTiZPL-XugCJOKowfe4oQOvYk9mXRR9Kds",
+									"value": "{{access_token}}",
 									"type": "string"
 								}
 							]
@@ -965,7 +1093,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"email\": \"927171598@qq.com\",\r\n  \"password\": \"123456\",\r\n  \"img_verification_code\": \"8F6N\"\r\n}",
+							"raw": "{\r\n  \"email\": \"927171598@qq.com\",\r\n  \"password\": \"123456\",\r\n  \"img_verification_code\": \"CNG9\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1042,7 +1170,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50X2lkIjoyLCJleHAiOjE3NDAzMjQ0OTcsInJvbGVfaWQiOjF9.o1LQpOw80c0cUFBQEOQEmX1JwE7RXP3xeaL4R1WgNao",
+									"value": "{{access_token}}",
 									"type": "string"
 								}
 							]

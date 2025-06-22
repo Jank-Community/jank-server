@@ -22,3 +22,6 @@ ci.yml
 
 # 忽略数据库文件
 /database/
+
+# 其他
+.DS_Store

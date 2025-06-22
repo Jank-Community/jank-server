@@ -15,6 +15,7 @@ import (
 
 	"jank.com/jank_blog/configs"
 	"jank.com/jank_blog/internal/global"
+	"jank.com/jank_blog/internal/mq"
 )
 
 // New 初始化Redis连接
@@ -27,7 +28,28 @@ func New(config *configs.Config) {
 		global.SysLog.Errorf("Redis 连接失败: %v", err)
 		return
 	}
+	storage := &global.Storage{
+		MapKey:       config.CommentMQConfig.MapKey,
+		StreamKey:    config.CommentMQConfig.StreamKey,
+		GroupName:    config.CommentMQConfig.GroupName,
+		ConsumerName: config.CommentMQConfig.ConsumerName,
+		MaxLength:    config.CommentMQConfig.MaxLength,
+	}
+
+	global.MQStorage = storage
 	global.RedisClient = client
+
+	// 确保消费者组存在
+	if err := mq.EnsureConsumerGroup(client, storage); err != nil {
+		log.Printf("创建消费者组失败: %v", err)
+		global.SysLog.Errorf("创建消费者组失败: %v", err)
+		return
+	}
+	if err := mq.RestoreMessagesFromDB(global.DB, client, storage); err != nil {
+		log.Printf("从数据库恢复消息失败: %v", err)
+		global.SysLog.Errorf("从数据库恢复消息失败: %v", err)
+		return
+	}
 	log.Println("Redis 连接成功...")
 	global.SysLog.Infof("Redis 连接成功...")
 }

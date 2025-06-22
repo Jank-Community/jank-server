@@ -13,6 +13,14 @@ APP:
     SWAGGER_HOST: "127.0.0.1:9010"
     SWAGGER_ENABLED: true # 是否启用 Swagger，可选值: true, false
 
+# 评论审核消息队列相关
+COMMENT_MQ:
+  COMMENT_MAP_KEY: "comment_audit_map" # 评论审核消息队列的 Map Key
+  COMMENT_STREAM_KEY: "comment_audit_stream" # 评论审核消息队列的 Stream Key
+  COMMENT_STREAM_GROUP: "comment_audit_group" # 评论审核消息队列的 Group Name
+  COMMENT_STREAM_CONSUMER: "comment_audit_consumer" # 评论审核消息队列的 Consumer Name
+  COMMENT_STREAM_MAX_LENGTH: 1000 # 评论审核消息队列的最大长度
+
 # 数据库相关
 DATABASE:
   DB_DIALECT: "postgres" # 数据库类型, 可选值: postgres, mysql, sqlite
